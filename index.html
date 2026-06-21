@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>תרגול למבחן · מבוא לתקשורת מחשבים (141418)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- =========================== HOME =========================== -->
+<div id="view-home" class="view view-home">
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="course-code">141418</span>
+      <span class="course-divider"></span>
+      <span class="course-name">המכללה האקדמית תל אביב-יפו · בית הספר למדעי המחשב</span>
+    </div>
+    <h1 class="hero-title">מבוא לתקשורת מחשבים</h1>
+    <p class="hero-subtitle">תרגול אינטראקטיבי למבחן · מבוסס על מבחנים אמיתיים משנים <span class="ltr">2023</span>–<span class="ltr">2025</span></p>
+    <div class="hero-stats" id="hero-stats"></div>
+  </header>
+
+  <section class="modes">
+    <h2 class="section-title">בחרו מצב תרגול</h2>
+    <div class="mode-grid">
+      <button class="mode-card mode-exam" data-action="start-exam">
+        <div class="mode-icon">⏱</div>
+        <h3>סימולציית מבחן מלא</h3>
+        <p><span class="ltr">20</span> שאלות אקראיות, טיימר של <span class="ltr">90</span> דקות, ניווט בין שאלות, חישוב ציון בסוף.</p>
+        <span class="mode-cta">להתחיל מבחן ←</span>
+      </button>
+
+      <button class="mode-card mode-practice" data-action="open-practice">
+        <div class="mode-icon">◉</div>
+        <h3>תרגול לפי נושא</h3>
+        <p>סינון לפי שכבת רשת או נושא ספציפי. בלי לחץ זמן, עם הסברים מפורטים אחרי כל שאלה.</p>
+        <span class="mode-cta">לבחור נושא ←</span>
+      </button>
+
+      <button class="mode-card mode-browse" data-action="open-browse">
+        <div class="mode-icon">≡</div>
+        <h3>גלישה במאגר</h3>
+        <p>צפייה בכל השאלות במאגר, מסודרות לפי מבחן ונושא. שימושי לחזרה לפני המבחן.</p>
+        <span class="mode-cta">לסקור שאלות ←</span>
+      </button>
+
+      <button class="mode-card mode-marked" data-action="open-marked">
+        <div class="mode-icon">★</div>
+        <h3>שאלות מסומנות</h3>
+        <p>שאלות שסימנתם לחזרה ושאלות שטעיתם בהן במבחנים קודמים.</p>
+        <span class="mode-cta">לראות מסומנות ←</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="topics-overview">
+    <h2 class="section-title">נושאי הקורס</h2>
+    <div class="topics-grid">
+      <div class="topic-badge" style="--topic-color: #8b5cf6">
+        <span class="topic-name">שכבת אפליקציה</span>
+        <span class="topic-detail">HTTP · DNS · Cookies · Proxy</span>
+      </div>
+      <div class="topic-badge" style="--topic-color: #3b82f6">
+        <span class="topic-name">שכבת תעבורה</span>
+        <span class="topic-detail">TCP · UDP · rdt · S&W · GBN</span>
+      </div>
+      <div class="topic-badge" style="--topic-color: #10b981">
+        <span class="topic-name">שכבת רשת</span>
+        <span class="topic-detail">IP · NAT · DHCP · ARP · Routing</span>
+      </div>
+      <div class="topic-badge" style="--topic-color: #f59e0b">
+        <span class="topic-name">שכבת קישור</span>
+        <span class="topic-detail">ALOHA · CSMA · Ethernet · Switch</span>
+      </div>
+      <div class="topic-badge" style="--topic-color: #ef4444">
+        <span class="topic-name">אבטחה</span>
+        <span class="topic-detail">RSA · MAC · Nonce · DOS</span>
+      </div>
+      <div class="topic-badge" style="--topic-color: #6b7280">
+        <span class="topic-name">כללי</span>
+        <span class="topic-detail">השהיות · שכבות · חישובים</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="info-section">
+    <h2 class="section-title">מבנה המבחן</h2>
+    <div class="exam-info-grid">
+      <div class="info-card">
+        <div class="info-label">משך</div>
+        <div class="info-value">שעה וחצי</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">מספר שאלות</div>
+        <div class="info-value"><span class="ltr">20</span></div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">ניקוד לשאלה</div>
+        <div class="info-value"><span class="ltr">5</span> נקודות</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">סוג השאלות</div>
+        <div class="info-value">אמריקאיות</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">חומר עזר</div>
+        <div class="info-value">מחשבון בלבד</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">מרצים</div>
+        <div class="info-value">ד״ר בינסקי · ד״ר פרי</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="home-footer">
+    <p>האתר נבנה על בסיס <span class="ltr">8</span> מבחנים אמיתיים והסיכום הרשמי לקורס.<br/>
+    חלק מהתשובות מסומנות כ"לאימות" — מומלץ לוודא מול ההרצאות.</p>
+  </footer>
+</div>
+
+<!-- =========================== EXAM =========================== -->
+<div id="view-exam" class="view view-exam hidden">
+  <div class="exam-header">
+    <div class="exam-header-left">
+      <button class="btn-icon" data-action="exit-exam" title="צא מהמבחן">✕</button>
+      <span class="exam-title">סימולציית מבחן</span>
+    </div>
+    <div class="exam-header-center">
+      <div class="exam-timer" id="exam-timer">90:00</div>
+    </div>
+    <div class="exam-header-right">
+      <span class="exam-progress" id="exam-progress">שאלה <span class="ltr">1</span> / <span class="ltr">20</span></span>
+      <button class="btn-primary" data-action="submit-exam">סיים מבחן</button>
+    </div>
+  </div>
+
+  <div class="exam-body">
+    <aside class="exam-nav" id="exam-nav"></aside>
+    <main class="exam-main" id="exam-question"></main>
+  </div>
+</div>
+
+<!-- =========================== RESULTS =========================== -->
+<div id="view-results" class="view view-results hidden">
+  <div class="results-container" id="results-container"></div>
+</div>
+
+<!-- =========================== PRACTICE =========================== -->
+<div id="view-practice" class="view view-practice hidden">
+  <div class="practice-header">
+    <button class="btn-back" data-action="back-home">→ חזרה לדף הבית</button>
+    <h1 class="practice-title">תרגול לפי נושא</h1>
+  </div>
+
+  <div class="practice-filters">
+    <div class="filter-group">
+      <span class="filter-label">סנן לפי שכבה:</span>
+      <div class="filter-chips" id="topic-filters"></div>
+    </div>
+    <div class="filter-summary" id="filter-summary"></div>
+  </div>
+
+  <div class="practice-questions" id="practice-questions"></div>
+</div>
+
+<!-- =========================== BROWSE =========================== -->
+<div id="view-browse" class="view view-browse hidden">
+  <div class="practice-header">
+    <button class="btn-back" data-action="back-home">→ חזרה לדף הבית</button>
+    <h1 class="practice-title">כל השאלות במאגר</h1>
+  </div>
+  <div class="browse-content" id="browse-content"></div>
+</div>
+
+<!-- =========================== MARKED =========================== -->
+<div id="view-marked" class="view view-marked hidden">
+  <div class="practice-header">
+    <button class="btn-back" data-action="back-home">→ חזרה לדף הבית</button>
+    <h1 class="practice-title">שאלות מסומנות וטעויות</h1>
+  </div>
+  <div class="marked-content" id="marked-content"></div>
+</div>
+
+<!-- Toast notifications -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="questions.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
