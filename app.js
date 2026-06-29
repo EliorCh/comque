@@ -201,7 +201,7 @@ const Exam = {
           </button>
         </div>
         <span class="topic-tag ${TOPIC_TAG_CLASS[q.topic]}">${TOPIC_NAMES[q.topic]} · ${q.subtopic}</span>
-        <div class="question-text">${renderQuestionBody(q)}</div>
+        <div class="question-text">${renderText(q.question)}</div>
         <div class="options-list">
           ${q.options.map((opt, i) => `
             <button class="option-item ${selected === i ? 'selected' : ''}" data-option="${i}">
@@ -363,7 +363,7 @@ const Exam = {
               <span class="review-q-status ${status}">${statusText}</span>
             </summary>
             <div style="margin-top: 12px;">
-              <div class="review-q-text">${renderQuestionBody(q)}</div>
+              <div class="review-q-text">${renderText(q.question)}</div>
               <div class="options-list" style="margin-top: 16px;">
                 ${q.options.map((opt, oi) => {
                   let cls = '';
@@ -506,7 +506,7 @@ const Practice = {
             ${isMarked ? '★ מסומנת' : '☆ סמן לחזרה'}
           </button>
         </div>
-        <div class="question-text">${renderQuestionBody(q)}</div>
+        <div class="question-text">${renderText(q.question)}</div>
         <div class="options-list">
           ${q.options.map((opt, i) => `
             <button class="option-item" data-option="${i}">
@@ -533,57 +533,38 @@ const Browse = {
     showView('browse');
     const container = document.getElementById('browse-content');
 
-    // Group by TOPIC in the 5-layer order (Application → Transport → Network → Link),
-    // then security and general. Within each topic, sub-group by subtopic.
-    const topicOrder = ['application', 'transport', 'network', 'link', 'security', 'general'];
-    const byTopic = {};
+    // group by source
+    const bySource = {};
     QUESTIONS.forEach(q => {
-      if (!byTopic[q.topic]) byTopic[q.topic] = {};
-      const sub = q.subtopic || '—';
-      if (!byTopic[q.topic][sub]) byTopic[q.topic][sub] = [];
-      byTopic[q.topic][sub].push(q);
+      if (!bySource[q.source]) bySource[q.source] = [];
+      bySource[q.source].push(q);
     });
 
-    container.innerHTML = topicOrder
-      .filter(topic => byTopic[topic])
-      .map(topic => {
-        const subs = byTopic[topic];
-        const totalCount = Object.values(subs).reduce((n, arr) => n + arr.length, 0);
-        const color = TOPIC_COLORS[topic];
-        return `
-          <h2 class="browse-topic-header" style="--topic-color: ${color}">
-            <span class="browse-topic-name">${TOPIC_NAMES[topic]}</span>
-            <span class="browse-topic-count">${totalCount} שאלות</span>
-          </h2>
-          ${Object.entries(subs).map(([sub, qs]) => `
-            <div class="browse-subtopic">
-              <h3 class="browse-subtopic-header"><span class="ltr">${sub}</span> <span class="browse-subtopic-count">· ${qs.length}</span></h3>
-              ${qs.map(q => `
-                <details class="practice-question browse-item-card" data-qid="${q.id}">
-                  <summary class="browse-summary">
-                    <span class="browse-summary-text">${renderQuestionBody(q)}</span>
-                    <span class="browse-summary-source">${q.source}</span>
-                  </summary>
-                  <div class="browse-details">
-                    <div class="options-list">
-                      ${q.options.map((opt, i) => `
-                        <div class="option-item ${i === q.correctIndex ? 'correct' : ''}" style="cursor: default;">
-                          <span class="option-letter">${'אבגדה'[i]}.</span>
-                          <span class="option-text">${renderText(opt)}</span>
-                        </div>
-                      `).join('')}
-                    </div>
-                    <div class="explanation">
-                      <div class="explanation-label">הסבר · התשובה הנכונה: ${'אבגדה'[q.correctIndex]}</div>
-                      <div class="explanation-body">${renderText(q.explanation)}</div>
-                    </div>
-                  </div>
-                </details>
+    container.innerHTML = Object.entries(bySource).map(([source, qs]) => `
+      <h2 style="font-size: 20px; font-weight: 700; margin-top: 32px; margin-bottom: 16px; color: var(--ink); padding-right: 8px;">${source} <span style="color: var(--ink-muted); font-weight: 400; font-size: 14px;">· ${qs.length} שאלות</span></h2>
+      ${qs.map(q => `
+        <details class="practice-question" data-qid="${q.id}" style="padding: 20px 24px;">
+          <summary style="cursor: pointer; display: flex; gap: 16px; align-items: flex-start; list-style: none;">
+            <span class="topic-tag ${TOPIC_TAG_CLASS[q.topic]}" style="flex-shrink: 0;">${q.subtopic}</span>
+            <span style="flex: 1; font-weight: 500;">${renderText(q.question)}</span>
+          </summary>
+          <div style="margin-top: 16px;">
+            <div class="options-list">
+              ${q.options.map((opt, i) => `
+                <div class="option-item ${i === q.correctIndex ? 'correct' : ''}" style="cursor: default;">
+                  <span class="option-letter">${'אבגדה'[i]}.</span>
+                  <span class="option-text">${renderText(opt)}</span>
+                </div>
               `).join('')}
             </div>
-          `).join('')}
-        `;
-      }).join('');
+            <div class="explanation">
+              <div class="explanation-label">הסבר · התשובה הנכונה: ${'אבגדה'[q.correctIndex]}</div>
+              <div class="explanation-body">${renderText(q.explanation)}</div>
+            </div>
+          </div>
+        </details>
+      `).join('')}
+    `).join('');
 
     renderMath();
   }
@@ -689,69 +670,22 @@ function showToast(msg) {
   showToast._t = setTimeout(() => toast.classList.add('hidden'), 2000);
 }
 
-// Wrap LTR-direction text fragments so RTL bidi behaves with Hebrew.
-// Critical: math formulas like "DevRTT = (1-β)·DevRTT + β·|SampleRTT|"
-// must stay as ONE continuous LTR run. If we break them at operators like
-// =, +, -, the Hebrew bidi algorithm scrambles the fragments.
-// Also: trailing sentence-ending punctuation (?, !, .) is moved OUT of
-// the LTR span so it sits at the proper end of the Hebrew sentence
-// rather than at the right edge of the LTR run.
+// Wrap English/numerical fragments in spans so RTL bidi behaves
 function renderText(text) {
   if (!text) return '';
   // escape HTML
   text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-  const inner = "[A-Za-z0-9_\\-+=:;/\\\\.,()\\[\\]{}@#$%^&*'\"`~?!|\u00B7\u00B1\u00D7\u00F7\u00B0\u2030\u0370-\u03FF\u2070-\u209F\u2200-\u22FF\u2190-\u21FF]";
-  const start = "[A-Za-z0-9\u0370-\u03FF]";
-  const open = "[\\(\\[\\{]?";
-  const piece = `${open}${start}${inner}*`;
-  const gap = `[ ]+(?:[=+\\-*/×÷·|\u00B1][ ]+)?`;
-  const re = new RegExp(`(${piece}(?:${gap}${piece})*)`, 'g');
-
-  text = text.replace(re, m => {
-    // Move trailing sentence-ending punctuation (?, !, .) outside the span.
-    // Keep internal punctuation (commas, semicolons, colons, math) inside.
-    const trailing = m.match(/[?!.]+$/);
-    if (trailing) {
-      const ltrPart = m.slice(0, m.length - trailing[0].length);
-      // Only split if there's still a real LTR token before the punctuation
-      if (ltrPart && /[A-Za-z0-9\u0370-\u03FF]/.test(ltrPart)) {
-        return `<span class="ltr">${ltrPart}</span>${trailing[0]}`;
-      }
-    }
-    return `<span class="ltr">${m}</span>`;
-  });
-
+  // wrap LTR sequences in span.ltr.
+  // A sequence may start with an opening bracket followed by a letter/digit,
+  // or directly with a letter/digit. It can continue with letters/digits and
+  // internal punctuation (including semicolons for HTML entities like &amp;).
+  text = text.replace(
+    /([\(\[\{]?[A-Za-z0-9][A-Za-z0-9_\-+=:;/\\.,()\[\]{}@#$%^&*'"`~?!]*(?:[ ]+[\(\[\{]?[A-Za-z0-9][A-Za-z0-9_\-+=:;/\\.,()\[\]{}@#$%^&*'"`~?!]*)*)/g,
+    m => `<span class="ltr">${m}</span>`
+  );
   // line breaks
   text = text.replace(/\n/g, '<br>');
   return text;
-}
-
-// Render a question body that may include a data table after the main text.
-// If q.dataTable is set, render it as an HTML table. If q.questionEnd is
-// also set, render that text after the table (so the table sits between
-// the intro text and the actual question).
-function renderQuestionBody(q) {
-  let html = renderText(q.question);
-  if (q.dataTable) {
-    const t = q.dataTable;
-    html += '<table class="data-table">';
-    if (t.headers && t.headers.length) {
-      html += '<thead><tr>' + t.headers.map(h => `<th>${renderText(h)}</th>`).join('') + '</tr></thead>';
-    }
-    if (t.rows && t.rows.length) {
-      html += '<tbody>';
-      for (const row of t.rows) {
-        html += '<tr>' + row.map(cell => `<td>${renderText(String(cell))}</td>`).join('') + '</tr>';
-      }
-      html += '</tbody>';
-    }
-    html += '</table>';
-  }
-  if (q.questionEnd) {
-    html += '<div class="question-end">' + renderText(q.questionEnd) + '</div>';
-  }
-  return html;
 }
 
 function renderMath() {
