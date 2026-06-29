@@ -27,6 +27,8 @@
     <div class="hero-stats" id="hero-stats"></div>
   </header>
 
+  <section id="weak-section" class="weak-section hidden"></section>
+
   <section class="modes">
     <h2 class="section-title">בחרו מצב תרגול</h2>
     <div class="mode-grid">
@@ -35,6 +37,13 @@
         <h3>סימולציית מבחן מלא</h3>
         <p><span class="ltr">20</span> שאלות אקראיות, טיימר של <span class="ltr">90</span> דקות, ניווט בין שאלות, חישוב ציון בסוף.</p>
         <span class="mode-cta">להתחיל מבחן ←</span>
+      </button>
+
+      <button class="mode-card mode-sample" data-action="start-sample-exam">
+        <div class="mode-icon">⚡</div>
+        <h3>מבחן לדוגמה</h3>
+        <p>גרסה קצרה — <span class="ltr">10</span> שאלות, <span class="ltr">45</span> דקות, עם ערבוב מלא של שאלות ואפשרויות לכל הפעלה.</p>
+        <span class="mode-cta">להתחיל מבחן קצר ←</span>
       </button>
 
       <button class="mode-card mode-practice" data-action="open-practice">
@@ -63,27 +72,27 @@
   <section class="topics-overview">
     <h2 class="section-title">נושאי הקורס</h2>
     <div class="topics-grid">
-      <div class="topic-badge" style="--topic-color: #8b5cf6">
+      <div class="topic-badge app">
         <span class="topic-name">שכבת אפליקציה</span>
         <span class="topic-detail">HTTP · DNS · Cookies · Proxy</span>
       </div>
-      <div class="topic-badge" style="--topic-color: #3b82f6">
+      <div class="topic-badge trans">
         <span class="topic-name">שכבת תעבורה</span>
         <span class="topic-detail">TCP · UDP · rdt · S&W · GBN</span>
       </div>
-      <div class="topic-badge" style="--topic-color: #10b981">
+      <div class="topic-badge net">
         <span class="topic-name">שכבת רשת</span>
         <span class="topic-detail">IP · NAT · DHCP · ARP · Routing</span>
       </div>
-      <div class="topic-badge" style="--topic-color: #f59e0b">
-        <span class="topic-name">שכבת ערוץ</span>
+      <div class="topic-badge link">
+        <span class="topic-name">שכבת קישור</span>
         <span class="topic-detail">ALOHA · CSMA · Ethernet · Switch</span>
       </div>
-      <div class="topic-badge" style="--topic-color: #ef4444">
+      <div class="topic-badge sec">
         <span class="topic-name">אבטחה</span>
         <span class="topic-detail">RSA · MAC · Nonce · DOS</span>
       </div>
-      <div class="topic-badge" style="--topic-color: #6b7280">
+      <div class="topic-badge gen">
         <span class="topic-name">כללי</span>
         <span class="topic-detail">השהיות · שכבות · חישובים</span>
       </div>

@@ -71,8 +71,12 @@ const Exam = {
   session: null,
   timerInterval: null,
 
-  start() {
-    // pick 20 random questions, weighted toward different topics
+  // mode: 'full' (20 q, 90 min) or 'sample' (10 q, 45 min, explicit demo)
+  start(mode = 'full') {
+    const size = mode === 'sample' ? 10 : 20;
+    const minutes = mode === 'sample' ? 45 : 90;
+
+    // pick questions, weighted toward different topics
     const byTopic = {};
     QUESTIONS.forEach(q => {
       if (!byTopic[q.topic]) byTopic[q.topic] = [];
@@ -80,36 +84,48 @@ const Exam = {
     });
 
     const selected = [];
-    // shuffle each topic's questions
     Object.values(byTopic).forEach(arr => shuffle(arr));
 
-    // distribute 20 questions across topics
     const topics = Object.keys(byTopic);
-    const perTopic = Math.floor(20 / topics.length);
-    const remainder = 20 - perTopic * topics.length;
+    const perTopic = Math.floor(size / topics.length);
+    const remainder = size - perTopic * topics.length;
 
     topics.forEach((topic, i) => {
       const count = perTopic + (i < remainder ? 1 : 0);
       selected.push(...byTopic[topic].slice(0, count));
     });
 
-    // fill up if we don't have enough
-    if (selected.length < 20) {
+    if (selected.length < size) {
       const allShuffled = shuffle([...QUESTIONS]);
       for (const q of allShuffled) {
-        if (selected.length >= 20) break;
+        if (selected.length >= size) break;
         if (!selected.includes(q)) selected.push(q);
       }
     }
 
     shuffle(selected);
+    const questions = selected.slice(0, size);
+
+    // Build per-session option-order permutations. optionOrders[i][p] = the
+    // original position in q.options that should be displayed at slot p.
+    // This means: every time the user takes the exam, the option order is
+    // different, so they can't memorize "the answer is always א".
+    const optionOrders = questions.map(q => {
+      const perm = q.options.map((_, idx) => idx);
+      shuffle(perm);
+      return perm;
+    });
+
     this.session = {
-      questions: selected.slice(0, 20),
-      answers: new Array(20).fill(null),
+      mode,
+      size,
+      questions,
+      optionOrders,
+      answers: new Array(size).fill(null), // stored as ORIGINAL indices
       flagged: new Set(),
       currentIdx: 0,
       startTime: Date.now(),
-      duration: 90 * 60 * 1000, // 90 min
+      duration: minutes * 60 * 1000,
     };
 
     this.show();
@@ -184,29 +200,37 @@ const Exam = {
 
   renderQuestion() {
     const q = this.session.questions[this.session.currentIdx];
-    const selected = this.session.answers[this.session.currentIdx];
+    const selectedOriginal = this.session.answers[this.session.currentIdx]; // stored as ORIGINAL index
     const isFlagged = this.session.flagged.has(this.session.currentIdx);
+    const perm = this.session.optionOrders[this.session.currentIdx];
+    const size = this.session.size;
+
+    // Map original-index back to display position
+    let selectedDisplay = -1;
+    if (selectedOriginal !== null) selectedDisplay = perm.indexOf(selectedOriginal);
+
+    const points = Math.round(100 / size);
 
     document.getElementById('exam-progress').innerHTML =
-      `שאלה <span class="ltr">${this.session.currentIdx + 1}</span> / <span class="ltr">20</span>`;
+      `שאלה <span class="ltr">${this.session.currentIdx + 1}</span> / <span class="ltr">${size}</span>`;
 
     document.getElementById('exam-question').innerHTML = `
       <div class="question-card">
         <div class="question-header">
           <div>
-            <span class="question-number">שאלה <span class="ltr">${this.session.currentIdx + 1}</span> · <span class="ltr">5</span> נקודות</span>
+            <span class="question-number">שאלה <span class="ltr">${this.session.currentIdx + 1}</span> · <span class="ltr">${points}</span> נקודות</span>
           </div>
           <button class="question-flag ${isFlagged ? 'active' : ''}" data-action="flag">
             ${isFlagged ? '★ מסומנת' : '☆ סמן לחזרה'}
           </button>
         </div>
         <span class="topic-tag ${TOPIC_TAG_CLASS[q.topic]}">${TOPIC_NAMES[q.topic]} · ${q.subtopic}</span>
-        <div class="question-text">${renderText(q.question)}</div>
+        <div class="question-text">${renderQuestionBody(q)}</div>
         <div class="options-list">
-          ${q.options.map((opt, i) => `
-            <button class="option-item ${selected === i ? 'selected' : ''}" data-option="${i}">
-              <span class="option-letter">${'אבגדה'[i]}.</span>
-              <span class="option-text">${renderText(opt)}</span>
+          ${perm.map((origIdx, displayIdx) => `
+            <button class="option-item ${selectedDisplay === displayIdx ? 'selected' : ''}" data-display="${displayIdx}" data-orig="${origIdx}">
+              <span class="option-letter">${'אבגדה'[displayIdx]}.</span>
+              <span class="option-text">${renderText(q.options[origIdx])}</span>
             </button>
           `).join('')}
         </div>
@@ -215,18 +239,19 @@ const Exam = {
             → קודמת
           </button>
           <span class="question-source">מקור: ${q.source}</span>
-          <button class="btn-secondary" data-action="next" ${this.session.currentIdx === 19 ? 'disabled' : ''}>
+          <button class="btn-secondary" data-action="next" ${this.session.currentIdx === size - 1 ? 'disabled' : ''}>
             הבאה ←
           </button>
         </div>
       </div>
     `;
 
-    // attach handlers
+    // Store the user's choice as the ORIGINAL option index (so submit can
+    // compare directly to q.correctIndex without any further translation)
     document.querySelectorAll('.option-item').forEach(btn => {
       btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.option);
-        this.session.answers[this.session.currentIdx] = idx;
+        const orig = parseInt(btn.dataset.orig);
+        this.session.answers[this.session.currentIdx] = orig;
         this.renderNav();
         this.renderQuestion();
       });
@@ -251,7 +276,7 @@ const Exam = {
     });
 
     document.querySelector('[data-action="next"]')?.addEventListener('click', () => {
-      if (this.session.currentIdx < 19) {
+      if (this.session.currentIdx < size - 1) {
         this.session.currentIdx++;
         this.renderNav();
         this.renderQuestion();
@@ -271,6 +296,9 @@ const Exam = {
 
     clearInterval(this.timerInterval);
 
+    const size = this.session.size;
+    const mode = this.session.mode;
+
     // calculate results
     let correct = 0;
     const wrongIds = [];
@@ -287,8 +315,8 @@ const Exam = {
       }
     });
 
-    const score = correct * 5;
-    const result = { score, total: 100, correct, wrongIds, byTopic, questions: this.session.questions, answers: this.session.answers };
+    const score = Math.round(correct * (100 / size));
+    const result = { mode, size, score, total: 100, correct, wrongIds, byTopic, questions: this.session.questions, answers: this.session.answers };
 
     State.addExamResult(result);
     this.showResults(result);
@@ -298,6 +326,7 @@ const Exam = {
   showResults(result) {
     showView('results');
     const container = document.getElementById('results-container');
+    const size = result.size || 20;
 
     let scoreClass = 'fail';
     let summaryText = 'יש לעבוד יותר. נסה תרגול לפי נושא.';
@@ -305,24 +334,26 @@ const Exam = {
     else if (result.score >= 75) { scoreClass = 'pass'; summaryText = 'יפה מאוד. חזור על השאלות שטעית בהן.'; }
     else if (result.score >= 60) { scoreClass = 'average'; summaryText = 'עברת! אך יש מקום לשיפור.'; }
 
+    const modeLabel = result.mode === 'sample' ? 'מבחן לדוגמה' : 'מבחן מלא';
+
     container.innerHTML = `
       <div class="results-header">
-        <div class="results-title">ציון סופי</div>
+        <div class="results-title">ציון ${modeLabel}</div>
         <div class="results-score ${scoreClass}">${result.score}</div>
         <div class="results-summary">${summaryText}</div>
       </div>
 
       <div class="results-stats">
         <div class="results-stat">
-          <div class="results-stat-value">${result.correct}/20</div>
+          <div class="results-stat-value">${result.correct}/${size}</div>
           <div class="results-stat-label">תשובות נכונות</div>
         </div>
         <div class="results-stat">
-          <div class="results-stat-value">${20 - result.correct}</div>
+          <div class="results-stat-value">${size - result.correct}</div>
           <div class="results-stat-label">טעויות</div>
         </div>
         <div class="results-stat">
-          <div class="results-stat-value">${result.wrongIds.length === 0 ? '✓' : Math.round(result.correct / 20 * 100) + '%'}</div>
+          <div class="results-stat-value">${result.wrongIds.length === 0 ? '✓' : Math.round(result.correct / size * 100) + '%'}</div>
           <div class="results-stat-label">אחוז הצלחה</div>
         </div>
       </div>
@@ -363,7 +394,7 @@ const Exam = {
               <span class="review-q-status ${status}">${statusText}</span>
             </summary>
             <div style="margin-top: 12px;">
-              <div class="review-q-text">${renderText(q.question)}</div>
+              <div class="review-q-text">${renderQuestionBody(q)}</div>
               <div class="options-list" style="margin-top: 16px;">
                 ${q.options.map((opt, oi) => {
                   let cls = '';
@@ -506,7 +537,7 @@ const Practice = {
             ${isMarked ? '★ מסומנת' : '☆ סמן לחזרה'}
           </button>
         </div>
-        <div class="question-text">${renderText(q.question)}</div>
+        <div class="question-text">${renderQuestionBody(q)}</div>
         <div class="options-list">
           ${q.options.map((opt, i) => `
             <button class="option-item" data-option="${i}">
@@ -533,38 +564,57 @@ const Browse = {
     showView('browse');
     const container = document.getElementById('browse-content');
 
-    // group by source
-    const bySource = {};
+    // Group by TOPIC in the 5-layer order (Application → Transport → Network → Link),
+    // then security and general. Within each topic, sub-group by subtopic.
+    const topicOrder = ['application', 'transport', 'network', 'link', 'security', 'general'];
+    const byTopic = {};
     QUESTIONS.forEach(q => {
-      if (!bySource[q.source]) bySource[q.source] = [];
-      bySource[q.source].push(q);
+      if (!byTopic[q.topic]) byTopic[q.topic] = {};
+      const sub = q.subtopic || '—';
+      if (!byTopic[q.topic][sub]) byTopic[q.topic][sub] = [];
+      byTopic[q.topic][sub].push(q);
     });
 
-    container.innerHTML = Object.entries(bySource).map(([source, qs]) => `
-      <h2 style="font-size: 20px; font-weight: 700; margin-top: 32px; margin-bottom: 16px; color: var(--ink); padding-right: 8px;">${source} <span style="color: var(--ink-muted); font-weight: 400; font-size: 14px;">· ${qs.length} שאלות</span></h2>
-      ${qs.map(q => `
-        <details class="practice-question" data-qid="${q.id}" style="padding: 20px 24px;">
-          <summary style="cursor: pointer; display: flex; gap: 16px; align-items: flex-start; list-style: none;">
-            <span class="topic-tag ${TOPIC_TAG_CLASS[q.topic]}" style="flex-shrink: 0;">${q.subtopic}</span>
-            <span style="flex: 1; font-weight: 500;">${renderText(q.question)}</span>
-          </summary>
-          <div style="margin-top: 16px;">
-            <div class="options-list">
-              ${q.options.map((opt, i) => `
-                <div class="option-item ${i === q.correctIndex ? 'correct' : ''}" style="cursor: default;">
-                  <span class="option-letter">${'אבגדה'[i]}.</span>
-                  <span class="option-text">${renderText(opt)}</span>
-                </div>
+    container.innerHTML = topicOrder
+      .filter(topic => byTopic[topic])
+      .map(topic => {
+        const subs = byTopic[topic];
+        const totalCount = Object.values(subs).reduce((n, arr) => n + arr.length, 0);
+        const color = TOPIC_COLORS[topic];
+        return `
+          <h2 class="browse-topic-header" style="--topic-color: ${color}">
+            <span class="browse-topic-name">${TOPIC_NAMES[topic]}</span>
+            <span class="browse-topic-count">${totalCount} שאלות</span>
+          </h2>
+          ${Object.entries(subs).map(([sub, qs]) => `
+            <div class="browse-subtopic">
+              <h3 class="browse-subtopic-header"><span class="ltr">${sub}</span> <span class="browse-subtopic-count">· ${qs.length}</span></h3>
+              ${qs.map(q => `
+                <details class="practice-question browse-item-card" data-qid="${q.id}">
+                  <summary class="browse-summary">
+                    <span class="browse-summary-text">${renderQuestionBody(q)}</span>
+                    <span class="browse-summary-source">${q.source}</span>
+                  </summary>
+                  <div class="browse-details">
+                    <div class="options-list">
+                      ${q.options.map((opt, i) => `
+                        <div class="option-item ${i === q.correctIndex ? 'correct' : ''}" style="cursor: default;">
+                          <span class="option-letter">${'אבגדה'[i]}.</span>
+                          <span class="option-text">${renderText(opt)}</span>
+                        </div>
+                      `).join('')}
+                    </div>
+                    <div class="explanation">
+                      <div class="explanation-label">הסבר · התשובה הנכונה: ${'אבגדה'[q.correctIndex]}</div>
+                      <div class="explanation-body">${renderText(q.explanation)}</div>
+                    </div>
+                  </div>
+                </details>
               `).join('')}
             </div>
-            <div class="explanation">
-              <div class="explanation-label">הסבר · התשובה הנכונה: ${'אבגדה'[q.correctIndex]}</div>
-              <div class="explanation-body">${renderText(q.explanation)}</div>
-            </div>
-          </div>
-        </details>
-      `).join('')}
-    `).join('');
+          `).join('')}
+        `;
+      }).join('');
 
     renderMath();
   }
@@ -670,22 +720,69 @@ function showToast(msg) {
   showToast._t = setTimeout(() => toast.classList.add('hidden'), 2000);
 }
 
-// Wrap English/numerical fragments in spans so RTL bidi behaves
+// Wrap LTR-direction text fragments so RTL bidi behaves with Hebrew.
+// Critical: math formulas like "DevRTT = (1-β)·DevRTT + β·|SampleRTT|"
+// must stay as ONE continuous LTR run. If we break them at operators like
+// =, +, -, the Hebrew bidi algorithm scrambles the fragments.
+// Also: trailing sentence-ending punctuation (?, !, .) is moved OUT of
+// the LTR span so it sits at the proper end of the Hebrew sentence
+// rather than at the right edge of the LTR run.
 function renderText(text) {
   if (!text) return '';
   // escape HTML
   text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  // wrap LTR sequences in span.ltr.
-  // A sequence may start with an opening bracket followed by a letter/digit,
-  // or directly with a letter/digit. It can continue with letters/digits and
-  // internal punctuation (including semicolons for HTML entities like &amp;).
-  text = text.replace(
-    /([\(\[\{]?[A-Za-z0-9][A-Za-z0-9_\-+=:;/\\.,()\[\]{}@#$%^&*'"`~?!]*(?:[ ]+[\(\[\{]?[A-Za-z0-9][A-Za-z0-9_\-+=:;/\\.,()\[\]{}@#$%^&*'"`~?!]*)*)/g,
-    m => `<span class="ltr">${m}</span>`
-  );
+
+  const inner = "[A-Za-z0-9_\\-+=:;/\\\\.,()\\[\\]{}@#$%^&*'\"`~?!|\u00B7\u00B1\u00D7\u00F7\u00B0\u2030\u0370-\u03FF\u2070-\u209F\u2200-\u22FF\u2190-\u21FF]";
+  const start = "[A-Za-z0-9\u0370-\u03FF]";
+  const open = "[\\(\\[\\{]?";
+  const piece = `${open}${start}${inner}*`;
+  const gap = `[ ]+(?:[=+\\-*/×÷·|\u00B1][ ]+)?`;
+  const re = new RegExp(`(${piece}(?:${gap}${piece})*)`, 'g');
+
+  text = text.replace(re, m => {
+    // Move trailing sentence-ending punctuation (?, !, .) outside the span.
+    // Keep internal punctuation (commas, semicolons, colons, math) inside.
+    const trailing = m.match(/[?!.]+$/);
+    if (trailing) {
+      const ltrPart = m.slice(0, m.length - trailing[0].length);
+      // Only split if there's still a real LTR token before the punctuation
+      if (ltrPart && /[A-Za-z0-9\u0370-\u03FF]/.test(ltrPart)) {
+        return `<span class="ltr">${ltrPart}</span>${trailing[0]}`;
+      }
+    }
+    return `<span class="ltr">${m}</span>`;
+  });
+
   // line breaks
   text = text.replace(/\n/g, '<br>');
   return text;
+}
+
+// Render a question body that may include a data table after the main text.
+// If q.dataTable is set, render it as an HTML table. If q.questionEnd is
+// also set, render that text after the table (so the table sits between
+// the intro text and the actual question).
+function renderQuestionBody(q) {
+  let html = renderText(q.question);
+  if (q.dataTable) {
+    const t = q.dataTable;
+    html += '<table class="data-table">';
+    if (t.headers && t.headers.length) {
+      html += '<thead><tr>' + t.headers.map(h => `<th>${renderText(h)}</th>`).join('') + '</tr></thead>';
+    }
+    if (t.rows && t.rows.length) {
+      html += '<tbody>';
+      for (const row of t.rows) {
+        html += '<tr>' + row.map(cell => `<td>${renderText(String(cell))}</td>`).join('') + '</tr>';
+      }
+      html += '</tbody>';
+    }
+    html += '</table>';
+  }
+  if (q.questionEnd) {
+    html += '<div class="question-end">' + renderText(q.questionEnd) + '</div>';
+  }
+  return html;
 }
 
 function renderMath() {
@@ -732,6 +829,62 @@ function renderHome() {
       <div class="hero-stat-label">שאלות מסומנות</div>
     </div>
   `;
+
+  renderWeakSection(state);
+}
+
+// Aggregate per-topic accuracy across all attempts and surface the weakest
+// topics. Hidden if the user hasn't taken any exam yet.
+function renderWeakSection(state) {
+  const container = document.getElementById('weak-section');
+  if (!container) return;
+
+  if (!state.history || state.history.length === 0) {
+    container.classList.add('hidden');
+    return;
+  }
+
+  const totals = {};
+  for (const h of state.history) {
+    if (!h.byTopic) continue;
+    for (const [topic, data] of Object.entries(h.byTopic)) {
+      if (!totals[topic]) totals[topic] = { correct: 0, total: 0 };
+      totals[topic].correct += data.correct;
+      totals[topic].total += data.total;
+    }
+  }
+
+  const topicRows = Object.entries(totals)
+    .filter(([, d]) => d.total >= 2) // need at least 2 attempts to be meaningful
+    .map(([topic, d]) => ({
+      topic,
+      pct: Math.round(d.correct / d.total * 100),
+      stat: `${d.correct}/${d.total}`
+    }))
+    .sort((a, b) => a.pct - b.pct);
+
+  // Show topics below 70% accuracy, up to 4 of them
+  const weak = topicRows.filter(r => r.pct < 70).slice(0, 4);
+
+  if (weak.length === 0) {
+    container.classList.add('hidden');
+    return;
+  }
+
+  container.classList.remove('hidden');
+  container.innerHTML = `
+    <h2>נושאים שכדאי לחזק</h2>
+    <div class="weak-section-subtitle">לפי הביצועים שלך במבחנים האחרונים — דיוק מתחת ל־<span class="ltr">70%</span></div>
+    <div class="weak-list">
+      ${weak.map(r => `
+        <div class="weak-item">
+          <div class="weak-item-topic">${TOPIC_NAMES[r.topic] || r.topic}</div>
+          <div class="weak-item-stat"><span class="ltr">${r.pct}%</span> דיוק · <span class="ltr">${r.stat}</span></div>
+          <div class="weak-item-bar"><div class="weak-item-bar-fill" style="width: ${r.pct}%"></div></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
 }
 
 // ============================================================
@@ -745,7 +898,10 @@ document.addEventListener('click', (e) => {
   switch (action) {
     case 'start-exam':
     case 'restart-exam':
-      Exam.start();
+      Exam.start('full');
+      break;
+    case 'start-sample-exam':
+      Exam.start('sample');
       break;
     case 'submit-exam':
       Exam.submit();
