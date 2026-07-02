@@ -104,7 +104,8 @@ const Exam = {
     }
 
     shuffle(selected);
-    const questions = selected.slice(0, size);
+    // resolveVariant: calculation questions get random numbers per session
+    const questions = selected.slice(0, size).map(resolveVariant);
 
     // Build per-session option-order permutations. optionOrders[i][p] = the
     // original position in q.options that should be displayed at slot p.
@@ -473,7 +474,10 @@ const Practice = {
   },
 
   renderQuestions() {
-    const filtered = this.getFiltered();
+    // resolveVariant: calculation questions show random numbers each render
+    const filtered = this.getFiltered().map(resolveVariant);
+    this.resolved = {};
+    filtered.forEach(q => { this.resolved[q.id] = q; });
     document.getElementById('filter-summary').textContent = `${filtered.length} שאלות`;
 
     const container = document.getElementById('practice-questions');
@@ -498,7 +502,7 @@ const Practice = {
         // disable all options
         card.querySelectorAll('.option-item').forEach((opt, i) => {
           opt.disabled = true;
-          const q = QUESTIONS.find(qq => qq.id === qId);
+          const q = this.resolved?.[qId] || QUESTIONS.find(qq => qq.id === qId);
           if (i === q.correctIndex) opt.classList.add('correct');
           else if (i === oIdx && i !== q.correctIndex) opt.classList.add('incorrect');
         });
@@ -568,7 +572,8 @@ const Browse = {
     // then security and general. Within each topic, sub-group by subtopic.
     const topicOrder = ['application', 'transport', 'network', 'link', 'security', 'general'];
     const byTopic = {};
-    QUESTIONS.forEach(q => {
+    // resolveVariant: גם במאגר, שאלות החישוב מוצגות עם נתונים מתחלפים (לא תמיד גרסת המבחן)
+    QUESTIONS.map(resolveVariant).forEach(q => {
       if (!byTopic[q.topic]) byTopic[q.topic] = {};
       const sub = q.subtopic || '—';
       if (!byTopic[q.topic][sub]) byTopic[q.topic][sub] = [];
@@ -628,12 +633,15 @@ const Marked = {
   show() {
     showView('marked');
     const state = State.load();
-    const markedQs = QUESTIONS.filter(q => state.marked.includes(q.id));
+    // resolveVariant: calculation questions show random numbers each render
+    const markedQs = QUESTIONS.filter(q => state.marked.includes(q.id)).map(resolveVariant);
 
     // also get questions user got wrong recently
     const wrongIds = new Set();
     state.history.slice(0, 5).forEach(h => h.wrongIds?.forEach(id => wrongIds.add(id)));
-    const wrongQs = QUESTIONS.filter(q => wrongIds.has(q.id) && !state.marked.includes(q.id));
+    const wrongQs = QUESTIONS.filter(q => wrongIds.has(q.id) && !state.marked.includes(q.id)).map(resolveVariant);
+    this.resolved = {};
+    [...markedQs, ...wrongQs].forEach(q => { this.resolved[q.id] = q; });
 
     const container = document.getElementById('marked-content');
 
@@ -666,7 +674,7 @@ const Marked = {
         const card = btn.closest('.practice-question');
         card.querySelectorAll('.option-item').forEach((opt, i) => {
           opt.disabled = true;
-          const q = QUESTIONS.find(qq => qq.id === qId);
+          const q = Marked.resolved?.[qId] || QUESTIONS.find(qq => qq.id === qId);
           if (i === q.correctIndex) opt.classList.add('correct');
           else if (i === oIdx && i !== q.correctIndex) opt.classList.add('incorrect');
         });
@@ -695,6 +703,21 @@ const Marked = {
 // ============================================================
 // Utilities
 // ============================================================
+
+// Some calculation/encryption questions carry a `variants` array — the same
+// question with different numbers (all hand-verified). Picking one at random
+// per session forces the user to actually compute instead of memorizing the
+// answer. Returns a resolved copy (base question counts as one of the versions).
+function resolveVariant(q) {
+  if (!q.variants || q.variants.length === 0) return q;
+  const pick = Math.floor(Math.random() * (q.variants.length + 1));
+  if (pick === 0) return q; // the original exam version
+  const v = q.variants[pick - 1];
+  return {
+    ...q, ...v,
+    explanation: v.explanation + "\n\n(הערה: הנתונים בגרסה זו שונו מהמבחן המקורי לצורך תרגול - הדרך והנוסחאות זהות.)"
+  };
+}
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
