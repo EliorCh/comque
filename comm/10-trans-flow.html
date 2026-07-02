@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בקרת זרימה · מבוא לתקשורת מחשבים</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/styles/atom-one-dark.min.css">
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/highlight.min.js"></script>
+
+<script>
+  window.addEventListener('load', () => {
+    if (window.renderMathInElement) {
+      try { renderMathInElement(document.body, { delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}], throwOnError: false, strict: false }); } catch(e){}
+    }
+    if (window.hljs) { try { document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el)); } catch(e){} }
+    document.body.classList.add('ready');
+    // Exercise reveal
+    document.querySelectorAll('.reveal-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.exercise-card').classList.toggle('open');
+        btn.textContent = btn.closest('.exercise-card').classList.contains('open') ? 'הסתר פתרון' : 'הראה פתרון';
+      });
+    });
+  });
+</script>
+
+<style>
+  :root {
+    --bg: #fbf9f3; --bg-paper: #fffefa; --ink: #1c1917; --ink-soft: #44403c; --ink-mute: #78716c;
+    --rule: #e7e5e0; --rule-soft: #f1efe9;
+    --indigo-9: #312e81; --indigo-7: #4f46e5; --indigo-3: #c7d2fe; --indigo-1: #eef2ff;
+    --c-theory-h: #1d4ed8; --c-theory-bg: #eff6ff; --c-theory-edge: #bfdbfe;
+    --c-formula-h: #b45309; --c-formula-bg: #fef9e7; --c-formula-edge: #fcd34d;
+    --c-example-h: #047857; --c-example-bg: #ecfdf5; --c-example-edge: #a7f3d0;
+    --c-warn-h: #be123c; --c-warn-bg: #fff1f2; --c-warn-edge: #fecdd3;
+    --c-exercise-h: #6d28d9; --c-exercise-bg: #f5f3ff; --c-exercise-edge: #ddd6fe;
+    --c-summary-h: #334155; --c-summary-bg: #f1f5f9; --c-summary-edge: #cbd5e1;
+    --code-bg: #0f172a; --code-bg-2: #1e293b; --code-ink: #e2e8f0;
+    --shadow-sm: 0 1px 2px rgba(28,25,23,.04), 0 1px 3px rgba(28,25,23,.06);
+    --shadow: 0 4px 12px rgba(28,25,23,.05), 0 1px 3px rgba(28,25,23,.04);
+    --serif: 'Frank Ruhl Libre', Georgia, serif;
+    --sans: 'Assistant', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.75; font-size: 17px; -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(circle at 20% 0%, rgba(99,102,241,.035), transparent 40%), radial-gradient(circle at 80% 100%, rgba(245,158,11,.035), transparent 40%);
+    background-attachment: fixed; opacity: 0; transition: opacity .2s ease; }
+  body.ready { opacity: 1; }
+  .app { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; max-width: 1480px; margin: 0 auto; }
+  .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%); color: #e0e7ff; padding: 28px 22px; border-left: 1px solid rgba(255,255,255,.06); }
+  .sidebar::-webkit-scrollbar { width: 6px; } .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 3px; }
+  .brand { font-family: var(--serif); font-size: 19px; font-weight: 700; color: #fff; margin-bottom: 6px; letter-spacing: -.01em; line-height: 1.25; }
+  .brand a { color: #fff; text-decoration: none; } .brand a:hover { color: #fbbf24; }
+  .brand-sub { font-size: 12.5px; color: #c7d2fe; margin-bottom: 22px; font-weight: 500; }
+  .brand-meta { font-size: 10.5px; color: #a5b4fc; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .nav-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .12em; color: #818cf8; font-weight: 700; margin: 18px 0 8px; padding-right: 8px; }
+  .nav-label.first { margin-top: 0; }
+  .nav-list { list-style: none; } .nav-list li { margin-bottom: 1px; }
+  .nav-list a { display: flex; align-items: center; gap: 9px; padding: 7px 10px; color: #c7d2fe; text-decoration: none; border-radius: 7px; font-size: 13.5px; font-weight: 500; transition: all .15s ease; line-height: 1.3; }
+  .nav-list a:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .nav-list a.active { background: rgba(255,255,255,.12); color: #fff; box-shadow: inset 3px 0 0 #fbbf24; }
+  .nav-list a.pending { opacity: .4; cursor: not-allowed; }
+  .nav-list a.pending:hover { background: transparent; color: #c7d2fe; }
+  .nav-num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 20px; background: rgba(255,255,255,.08); border-radius: 5px; font-size: 10.5px; font-weight: 700; font-family: var(--mono); padding: 0 4px; }
+  .nav-list a.active .nav-num { background: #fbbf24; color: #1e1b4b; }
+  main { padding: 56px 64px 120px; max-width: 980px; }
+  .page-eyebrow { display: inline-block; font-size: 12px; font-weight: 700; color: var(--indigo-7); letter-spacing: .15em; text-transform: uppercase; background: var(--indigo-1); padding: 6px 12px; border-radius: 99px; margin-bottom: 16px; }
+  h1.page-title { font-family: var(--serif); font-size: 46px; font-weight: 700; line-height: 1.15; letter-spacing: -.02em; color: var(--ink); margin-bottom: 14px; }
+  .page-subtitle { font-size: 19px; color: var(--ink-soft); margin-bottom: 36px; font-weight: 400; line-height: 1.55; }
+  h2 { font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.015em; margin: 48px 0 18px; color: var(--ink); position: relative; padding-right: 20px; }
+  h2::before { content: ''; position: absolute; right: 0; top: 12px; bottom: 12px; width: 4px; background: var(--indigo-7); border-radius: 2px; }
+  h3 { font-family: var(--sans); font-size: 21px; font-weight: 700; margin: 30px 0 12px; color: var(--ink); letter-spacing: -.005em; }
+  h4 { font-size: 17px; font-weight: 700; margin: 18px 0 8px; color: var(--ink-soft); }
+  p { margin-bottom: 14px; color: var(--ink-soft); } p strong { color: var(--ink); font-weight: 700; }
+  ul, ol { margin: 12px 24px 18px; color: var(--ink-soft); } li { margin-bottom: 6px; }
+  .term { font-family: var(--mono); direction: ltr; display: inline-block; font-size: .88em; background: #f5f5f4; padding: 1px 8px; border-radius: 5px; color: #be185d; border: 1px solid #e7e5e4; vertical-align: baseline; unicode-bidi: isolate; }
+  .term.blue { color: var(--c-theory-h); background: var(--c-theory-bg); border-color: var(--c-theory-edge); }
+  .term.green { color: var(--c-example-h); background: var(--c-example-bg); border-color: var(--c-example-edge); }
+  .term.amber { color: var(--c-formula-h); background: var(--c-formula-bg); border-color: var(--c-formula-edge); }
+  .term.purple { color: var(--c-exercise-h); background: var(--c-exercise-bg); border-color: var(--c-exercise-edge); }
+  .term.red { color: var(--c-warn-h); background: var(--c-warn-bg); border-color: var(--c-warn-edge); }
+  .term.cyan { color: #0891b2; background: #ecfeff; border-color: #a5f3fc; }
+  .katex-display { margin: 18px 0 !important; direction: ltr !important; text-align: center !important; unicode-bidi: isolate; } .katex { direction: ltr !important; unicode-bidi: isolate; }
+  .box { border-radius: 14px; margin: 22px 0; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--rule); background: var(--bg-paper); }
+  .box-head { display: flex; align-items: center; gap: 12px; padding: 13px 22px; font-weight: 700; font-size: 15px; border-bottom: 1px solid var(--rule-soft); }
+  .box-head .icon { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; font-size: 16px; }
+  .box-body { padding: 20px 26px; } .box-body > *:last-child { margin-bottom: 0; }
+  .box.theory { border-color: var(--c-theory-edge); } .box.theory .box-head { background: var(--c-theory-bg); color: var(--c-theory-h); } .box.theory .box-head .icon { background: var(--c-theory-h); color: #fff; }
+  .box.formula { border-color: var(--c-formula-edge); background: var(--c-formula-bg); } .box.formula .box-head { background: transparent; color: var(--c-formula-h); border-bottom-color: rgba(180,83,9,.18); } .box.formula .box-head .icon { background: var(--c-formula-h); color: #fff; } .box.formula .box-body { background: var(--c-formula-bg); } .box.formula p { color: #78350f; }
+  .box.example { border-color: var(--c-example-edge); } .box.example .box-head { background: var(--c-example-bg); color: var(--c-example-h); } .box.example .box-head .icon { background: var(--c-example-h); color: #fff; }
+  .box.warn { border-color: var(--c-warn-edge); } .box.warn .box-head { background: var(--c-warn-bg); color: var(--c-warn-h); } .box.warn .box-head .icon { background: var(--c-warn-h); color: #fff; }
+  .box.exercise { border-color: var(--c-exercise-edge); } .box.exercise .box-head { background: var(--c-exercise-bg); color: var(--c-exercise-h); } .box.exercise .box-head .icon { background: var(--c-exercise-h); color: #fff; }
+  .box.summary { border-color: var(--c-summary-edge); } .box.summary .box-head { background: var(--c-summary-bg); color: var(--c-summary-h); } .box.summary .box-head .icon { background: var(--c-summary-h); color: #fff; }
+  pre { background: var(--code-bg) !important; border-radius: 0 0 12px 12px; padding: 18px 22px !important; margin: 0 0 16px 0; overflow-x: auto; direction: ltr; font-size: 14px; line-height: 1.7; box-shadow: var(--shadow); border: 1px solid var(--code-bg-2); border-top: none; }
+  pre code { font-family: var(--mono) !important; background: transparent !important; padding: 0 !important; border: none !important; color: var(--code-ink) !important; }
+  .code-label { display: flex; align-items: center; gap: 8px; background: var(--code-bg-2); color: #94a3b8; font-family: var(--mono); font-size: 12px; padding: 10px 16px; border-radius: 12px 12px 0 0; direction: ltr; border: 1px solid var(--code-bg-2); border-bottom: 1px solid #334155; margin-top: 18px; }
+  .code-label .dot { width: 8px; height: 8px; border-radius: 50%; background: #475569; }
+  .code-label .name { margin-right: auto; opacity: .9; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-sm); font-size: 15px; }
+  th, td { padding: 11px 14px; text-align: right; border-bottom: 1px solid var(--rule-soft); border-left: 1px solid var(--rule-soft); }
+  th { background: var(--c-summary-bg); font-weight: 700; color: var(--c-summary-h); }
+  tr:last-child td { border-bottom: none; }
+  td.num, th.num { font-family: var(--mono); direction: ltr; text-align: center; font-size: 14px; }
+  td.highlight { background: var(--c-formula-bg); font-weight: 700; color: var(--c-formula-h); }
+  .exercise-card { background: #fff; border-radius: 10px; margin: 14px 0; border: 1px solid var(--c-exercise-edge); overflow: hidden; }
+  .exercise-tag { display: inline-block; font-size: 11px; font-weight: 700; background: var(--c-exercise-h); color: #fff; padding: 3px 10px; border-radius: 99px; margin-bottom: 10px; font-family: var(--mono); letter-spacing: .05em; direction: ltr; }
+  .exercise-q { padding: 20px 24px; background: #fafaf9; border-bottom: 1px solid var(--rule-soft); }
+  .exercise-q p:last-child { margin-bottom: 0; }
+  .reveal-btn { display: block; width: 100%; background: var(--c-exercise-bg); border: none; border-top: 1px solid var(--c-exercise-edge); padding: 13px; font-family: var(--sans); font-size: 14px; font-weight: 700; color: var(--c-exercise-h); cursor: pointer; transition: background .15s ease; }
+  .reveal-btn:hover { background: #ede9fe; }
+  .solution { padding: 22px 26px; background: var(--c-example-bg); border-top: 1px solid var(--c-example-edge); display: none; }
+  .exercise-card.open .solution { display: block; }
+  .solution .step { background: #fff; border-radius: 8px; padding: 14px 18px; margin: 12px 0; border-right: 3px solid var(--c-example-h); }
+  .solution .step-label { font-size: 11px; font-weight: 700; color: var(--c-example-h); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; font-family: var(--mono); }
+  .solution .final-answer { background: #fff; border: 2px solid var(--c-example-h); border-radius: 10px; padding: 14px 20px; margin-top: 16px; font-weight: 600; }
+  .solution .final-answer::before { content: '✓ '; color: var(--c-example-h); font-weight: 900; }
+  .lead { font-size: 19px; color: var(--ink-soft); border-right: 3px solid var(--indigo-7); padding-right: 20px; margin: 24px 0 32px; font-weight: 400; line-height: 1.6; }
+  .keypoint { background: linear-gradient(90deg, var(--c-formula-bg) 0%, transparent 100%); padding: 14px 18px; border-radius: 8px; margin: 16px 0; border-right: 3px solid var(--c-formula-h); }
+  .keypoint::before { content: '💡 '; font-size: 18px; margin-left: 4px; }
+  .mc-list { list-style: none; margin: 12px 0; padding: 0; }
+  .mc-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: #fff; border: 1px solid var(--rule); border-radius: 8px; margin-bottom: 8px; transition: all .15s ease; }
+  .mc-list li .mc-marker { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--rule); flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--ink-mute); background: #fff; }
+  .mc-list li.correct { background: var(--c-example-bg); border-color: var(--c-example-edge); }
+  .mc-list li.correct .mc-marker { background: var(--c-example-h); color: #fff; border-color: var(--c-example-h); }
+  .mc-list li.correct .mc-marker::after { content: '✓'; }
+  .mc-list li.wrong { background: var(--c-warn-bg); border-color: var(--c-warn-edge); }
+  .mc-list li.wrong .mc-marker { background: var(--c-warn-h); color: #fff; border-color: var(--c-warn-h); }
+  .mc-list li.wrong .mc-marker::after { content: '✗'; }
+  .mc-list li .mc-text { flex: 1; line-height: 1.55; color: var(--ink-soft); }
+  .mc-list li .mc-text .why { display: block; margin-top: 6px; font-size: 13.5px; color: var(--ink-mute); font-style: italic; }
+  .figure { background: #fff; border: 1px solid var(--rule); border-radius: 12px; padding: 18px; margin: 18px 0; text-align: center; box-shadow: var(--shadow-sm); }
+  .figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  .figure .cap { font-size: 13px; color: var(--ink-mute); margin-top: 12px; font-style: italic; }
+
+  /* Enrichment (העשרה) - content not in lectures, collapsible */
+  details.enrichment { background: #faf8f3; border: 1px dashed #c7c2b5; border-radius: 10px; margin: 18px 0; padding: 0; overflow: hidden; }
+  details.enrichment > summary { cursor: pointer; padding: 12px 18px; background: linear-gradient(90deg, #f5f2ea 0%, #faf8f3 100%); font-family: var(--sans); font-size: 14px; font-weight: 700; color: #6b6354; user-select: none; list-style: none; display: flex; align-items: center; gap: 10px; }
+  details.enrichment > summary::-webkit-details-marker { display: none; }
+  details.enrichment > summary::before { content: '📚'; font-size: 16px; }
+  details.enrichment > summary::after { content: 'לחץ להרחבה ▾'; margin-right: auto; font-size: 11px; font-weight: 500; color: #9a9080; letter-spacing: .04em; }
+  details.enrichment[open] > summary::after { content: 'הסתר ▴'; }
+  details.enrichment > summary:hover { background: #f0ece2; }
+  details.enrichment .enrichment-body { padding: 14px 22px 18px; border-top: 1px dashed #d8d3c2; }
+  details.enrichment .enrichment-body > *:first-child { margin-top: 0; }
+  details.enrichment .enrichment-note { font-size: 12px; color: #9a9080; font-style: italic; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dotted #d8d3c2; }
+  @media (max-width: 900px) { .app { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } main { padding: 32px 24px 80px; } h1.page-title { font-size: 34px; } h2 { font-size: 25px; } }
+
+/* ===== glossary-tooltips-v1 ===== */
+.gloss {
+  border-bottom: 1px dashed var(--indigo-3, #c7d2fe);
+  cursor: help;
+  position: relative;
+}
+.gloss::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 50%;
+  transform: translateX(50%);
+  background: var(--ink, #1c1917);
+  color: var(--bg, #fbf9f3);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.55;
+  white-space: normal;
+  width: max-content;
+  max-width: 320px;
+  z-index: 100;
+  direction: rtl;
+  text-align: right;
+  box-shadow: 0 4px 16px rgba(60,55,50,0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  font-family: 'Assistant', sans-serif;
+}
+.gloss::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 3px);
+  right: 50%;
+  transform: translateX(50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink, #1c1917);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.gloss:hover::after, .gloss:hover::before,
+.gloss:focus::after, .gloss:focus::before,
+.gloss.tap::after,  .gloss.tap::before {
+  opacity: 1;
+}
+
+/* ===== pager-v1 ===== */
+.pager { display:flex; justify-content:space-between; gap:12px; margin-top:40px; padding-top:22px; border-top:1px solid var(--rule, #e7e5e0); }
+.pager a { display:flex; flex-direction:column; gap:3px; text-decoration:none; padding:12px 16px; border:1px solid var(--rule, #e7e5e0); border-radius:10px; background:var(--bg-paper, #fffefa); max-width:48%; transition:border-color .15s, box-shadow .15s; }
+.pager a:hover { border-color: var(--indigo-3, #c7d2fe); box-shadow:0 2px 10px rgba(60,55,50,.08); }
+.pager a.next { margin-inline-start:auto; text-align:left; }
+.pager .dir { font-size:12px; color:var(--ink-mute, #78716c); font-weight:600; }
+.pager .name { font-size:14.5px; color:var(--indigo-7, #4f46e5); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="brand"><a href="index.html">מבוא לתקשורת<br>מחשבים</a></div>
+  <div class="brand-sub">ד״ר מור פרי · ד״ר הדר בינסקי</div>
+  <div class="brand-meta">MTA · הכנה למבחן</div>
+
+  <div class="nav-label first">📘 מבוא</div>
+  <ul class="nav-list">
+    <li><a href="00-intro.html" data-page="00"><span class="nav-num">0.1</span>רשת האינטרנט והשכבות</a></li>
+    <li><a href="01-delays.html" data-page="01"><span class="nav-num">0.2</span>השהיות ברשת</a></li>
+  </ul>
+
+  <div class="nav-label">1️⃣ שכבת האפליקציה</div>
+  <ul class="nav-list">
+    <li><a href="02-app-sockets.html" data-page="02"><span class="nav-num">1.1</span>סוקטים, לקוח-שרת, P2P</a></li>
+    <li><a href="03-app-http.html" data-page="03"><span class="nav-num">1.2</span>HTTP</a></li>
+    <li><a href="04-app-proxy-cache.html" data-page="04"><span class="nav-num">1.3</span>Proxy, Cache, Cond. GET</a></li>
+    <li><a href="05-app-cookies.html" data-page="05"><span class="nav-num">1.4</span>Cookies</a></li>
+    <li><a href="06-app-dns.html" data-page="06"><span class="nav-num">1.5</span>DNS</a></li>
+    <li><a href="sum-app.html" data-page="sum-app"><span class="nav-num">📌</span>סיכום השכבה</a></li>
+  </ul>
+
+  <div class="nav-label">2️⃣ שכבת התעבורה</div>
+  <ul class="nav-list">
+    <li><a href="07-trans-udp.html" data-page="07"><span class="nav-num">2.1</span>UDP ומולטיפלקסינג</a></li>
+    <li><a href="08-trans-rdt.html" data-page="08"><span class="nav-num">2.2</span>העברה אמינה (RDT)</a></li>
+    <li><a href="09-trans-tcp.html" data-page="09"><span class="nav-num">2.3</span>TCP — מבנה</a></li>
+    <li><a href="10-trans-flow.html" class="active" data-page="10"><span class="nav-num">2.4</span>בקרת זרימה</a></li>
+    <li><a href="11-trans-handshake.html" data-page="11"><span class="nav-num">2.5</span>הקמת וסגירת קשר</a></li>
+    <li><a href="12-trans-congestion.html" data-page="12"><span class="nav-num">2.6</span>בקרת גודש</a></li>
+    <li><a href="sum-trans.html" data-page="sum-trans"><span class="nav-num">📌</span>סיכום השכבה</a></li>
+  </ul>
+
+  <div class="nav-label">3️⃣ שכבת הרשת</div>
+  <ul class="nav-list">
+    <li><a href="13-net-intro.html" data-page="13"><span class="nav-num">3.1</span>IP דאטהגרם</a></li>
+    <li><a href="14-net-fragmentation.html" data-page="14"><span class="nav-num">3.2</span>פרגמנטציה</a></li>
+    <li><a href="15-net-ip-addressing.html" data-page="15"><span class="nav-num">3.3</span>כתובות IP</a></li>
+    <li><a href="16-net-dhcp.html" data-page="16"><span class="nav-num">3.4</span>DHCP</a></li>
+    <li><a href="17-net-nat-ipv6.html" data-page="17"><span class="nav-num">3.5</span>NAT, IPv6, ICMP</a></li>
+    <li><a href="18-net-routing.html" data-page="18"><span class="nav-num">3.6</span>ראוטינג — DV, LS</a></li>
+    <li><a href="19-net-ospf-bgp.html" data-page="19"><span class="nav-num">3.7</span>OSPF, BGP, AS</a></li>
+    <li><a href="sum-net.html" data-page="sum-net"><span class="nav-num">📌</span>סיכום השכבה</a></li>
+  </ul>
+
+  <div class="nav-label">4️⃣ שכבת הקישור</div>
+  <ul class="nav-list">
+    <li><a href="20-link-framing.html" data-page="20"><span class="nav-num">4.1</span>Framing ושירותים</a></li>
+    <li><a href="21-link-aloha.html" data-page="21"><span class="nav-num">4.2</span>ALOHA</a></li>
+    <li><a href="22-link-csma.html" data-page="22"><span class="nav-num">4.3</span>CSMA, Ethernet</a></li>
+    <li><a href="23-link-mac-arp.html" data-page="23"><span class="nav-num">4.4</span>MAC, ARP</a></li>
+    <li><a href="24-link-switches.html" data-page="24"><span class="nav-num">4.5</span>סוויצ'ים</a></li>
+    <li><a href="25-link-day-in-life.html" data-page="25"><span class="nav-num">4.6</span>יום בחיי הודעה</a></li>
+    <li><a href="sum-link.html" data-page="sum-link"><span class="nav-num">📌</span>סיכום השכבה</a></li>
+  </ul>
+
+  <div class="nav-label">5️⃣ השכבה הפיזית</div>
+  <ul class="nav-list">
+    <li><a href="26-phys-signals.html" data-page="26"><span class="nav-num">5.1</span>אותות וביטים</a></li>
+  </ul>
+
+  <div class="nav-label">🔐 אבטחה וקריפטוגרפיה</div>
+  <ul class="nav-list">
+    <li><a href="27-sec-threats.html" data-page="27"><span class="nav-num">6.1</span>איומים</a></li>
+    <li><a href="28-sec-crypto.html" data-page="28"><span class="nav-num">6.2</span>הצפנה סימטרית/אסימטרית</a></li>
+    <li><a href="29-sec-signatures.html" data-page="29"><span class="nav-num">6.3</span>חתימה דיגיטלית</a></li>
+    <li><a href="30-sec-ssl.html" data-page="30"><span class="nav-num">6.4</span>SSL/TLS</a></li>
+    <li><a href="sum-sec.html" data-page="sum-sec"><span class="nav-num">📌</span>סיכום השכבה</a></li>
+  </ul>
+
+  <div class="nav-label">📋 חזרה</div>
+  <ul class="nav-list">
+    <li><a href="31-cheatsheet.html" data-page="31"><span class="nav-num">📋</span>דף נוסחאות</a></li>
+    <li><a href="https://eliorch.github.io/comque" target="_blank" rel="noopener" data-page="comque"><span class="nav-num">🎯</span>אתר השאלות</a></li>
+  </ul>
+
+</aside>
+
+<main>
+  <span class="page-eyebrow">פרק 2.4 · שכבת התעבורה</span>
+  <h1 class="page-title">בקרת זרימה — Flow Control</h1>
+  <p class="page-subtitle">המקבל שולט בשולח. ‎Receive Window, Delayed ACK, ו-Nagle's algorithm.</p>
+
+  <p class="lead">
+    מה אם השולח מהיר מהמקבל? הבאפר של המקבל יתמלא ויאבדו פאקטות. <strong>בקרת זרימה</strong> = המקבל מודיע לשולח כמה מקום פנוי יש לו ב-Receive Window, והשולח <strong>חייב</strong> להגביל את עצמו לכך. שונה מ<strong>בקרת גודש</strong> שמתייחסת לרשת (פרק 2.6).
+  </p>
+
+  <h2>הבעיה</h2>
+
+  <div class="box warn">
+    <div class="box-head"><span class="icon">⚠</span>קצבים לא תואמים</div>
+    <div class="box-body">
+      <p>הרשת מספקת נתונים לבאפר של המקבל. האפליקציה אצל המקבל מוציאה ממנו. מה אם:</p>
+      <ul>
+        <li><strong>קצב הכניסה לבאפר</strong> (משכבת הרשת) > <strong>קצב הקריאה</strong> (ע״י האפליקציה)?</li>
+      </ul>
+      <p>הבאפר מתמלא. בסופו של דבר — <strong>פאקטות יאבדו</strong>. השולח יצטרך לשלוח שוב — בזבוז גדול.</p>
+    </div>
+  </div>
+
+  <div class="box theory">
+    <div class="box-head"><span class="icon">📘</span>חלוקת אחריות</div>
+    <div class="box-body">
+      <ul>
+        <li><strong>כניסה לבאפר:</strong> אחריות השולח (כמה מהר ישלח).</li>
+        <li><strong>ניקוי הבאפר:</strong> אחריות האפליקציה אצל המקבל (כמה מהר תקרא).</li>
+      </ul>
+      <p>אבל השולח הוא הצד שיכול להאט. אז המקבל <strong>חייב להודיע</strong> לשולח מה המצב.</p>
+    </div>
+  </div>
+
+  <h2>Receive Window (RW)</h2>
+
+  <div class="box theory">
+    <div class="box-head"><span class="icon">📘</span>השדה בכותרת</div>
+    <div class="box-body">
+      <p>בכותרת TCP יש שדה <span class="term">Receive Window (16 ביט)</span>. בכל סגמנט שהמקבל שולח חזרה לשולח, הוא <strong>מצהיר</strong> כמה בתים פנויים יש לו בבאפר.</p>
+      <p>הכלל המוחלט:</p>
+      <div class="box formula">
+        <div class="box-head"><span class="icon">📐</span>חוק זהב</div>
+        <div class="box-body">
+          <p>השולח לא ישלח יותר מ-<strong>‎RW</strong> בתים לא-מאושרים.</p>
+          $$\text{LastByteSent} - \text{LastByteAcked} \leq RW$$
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="figure">
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Receive Window בבאפר המקבל">
+      <g font-family="Assistant, sans-serif" font-size="11">
+        <!-- Buffer -->
+        <rect x="80" y="80" width="560" height="50" fill="#fef9e7" stroke="#b45309" stroke-width="2"/>
+        <text x="40" y="108" font-size="11" fill="#b45309" font-weight="700">Buffer</text>
+
+        <!-- Already read by app -->
+        <rect x="80" y="80" width="120" height="50" fill="#d4d4d4" stroke="#475569" stroke-width="1"/>
+        <text x="140" y="108" text-anchor="middle" font-size="10" fill="#475569">נקרא ע״י App</text>
+
+        <!-- Bytes waiting (in buffer) -->
+        <rect x="200" y="80" width="180" height="50" fill="#fef9e7" stroke="#475569" stroke-width="1"/>
+        <text x="290" y="108" text-anchor="middle" font-size="10" fill="#b45309">בתור (מחכים לקריאה)</text>
+
+        <!-- Free space — Receive Window -->
+        <rect x="380" y="80" width="260" height="50" fill="#ecfdf5" stroke="#047857" stroke-width="2"/>
+        <text x="510" y="105" text-anchor="middle" font-size="12" fill="#047857" font-weight="700">RW (פנוי)</text>
+        <text x="510" y="120" text-anchor="middle" font-size="10" fill="#047857">← השולח לא יחרוג מכאן</text>
+
+        <!-- Labels -->
+        <text x="80" y="70" font-size="9" fill="#78716c">LastByteRead</text>
+        <text x="200" y="70" font-size="9" fill="#78716c">↑</text>
+        <text x="380" y="70" font-size="9" fill="#78716c">LastByteRcvd</text>
+        <text x="640" y="70" font-size="9" fill="#78716c">RcvBuffer end</text>
+
+        <!-- Arrows -->
+        <text x="510" y="155" text-anchor="middle" font-size="11" fill="#047857" font-weight="700">RW = RcvBuffer − [LastByteRcvd − LastByteRead]</text>
+        <text x="510" y="180" text-anchor="middle" font-size="10" fill="#78716c">המקבל מצרף את RW בכל ACK שהוא שולח</text>
+      </g>
+    </svg>
+    <div class="cap">הבאפר מחולק לקטעים: נקרא, בתור, פנוי. הקטע הפנוי הוא ה-RW.</div>
+  </div>
+
+  <div class="box formula">
+    <div class="box-head"><span class="icon">📐</span>חישוב RW</div>
+    <div class="box-body">
+      $$RW = \text{RcvBuffer} - (\text{LastByteRcvd} - \text{LastByteRead})$$
+      <p>הסבר: גודל הבאפר הכולל, פחות מה שכבר בו (התקבל אבל לא נקרא).</p>
+    </div>
+  </div>
+
+  <h2>שאלה מעניינת — סגמנטים לא בסדר</h2>
+
+  <div class="box example">
+    <div class="box-head"><span class="icon">💡</span>תרחיש</div>
+    <div class="box-body">
+      <p>RW = ‎10,000. מגיע סגמנט לא בסדר (SEQ גדול מהצפוי), בגודל ‎1,000 בתים. <strong>מה ה-RW שנדווח לשולח?</strong></p>
+      <h4>שתי גישות</h4>
+      <ul>
+        <li>‎9,000 (כי הסגמנט תופס 1000)</li>
+        <li>‎10,000 (כי הוא לא נכנס לתור הסדור)</li>
+      </ul>
+      <h4>התשובה הנכונה: 10,000</h4>
+      <p><strong>למה?</strong> סגמנט לא בסדר <strong>לא נספר ב-RW</strong>! המקבל לא יכול להעביר אותו לאפליקציה (אין רצף) ← הוא ממתין בצד עד שיגיע החור. גודל ה-RW נשאר 10,000.</p>
+      <div class="final-answer">סגמנטים לא בסדר <strong>לא מקטינים את RW</strong>. רק סגמנטים שנכנסו לתור הסדור.</div>
+    </div>
+  </div>
+
+  <h2>Delayed ACK — חיסכון ב-ACKs</h2>
+
+  <div class="box theory">
+    <div class="box-head"><span class="icon">📘</span>הרעיון</div>
+    <div class="box-body">
+      <p>במקום לשלוח ACK מיד אחרי כל סגמנט — המקבל <strong>מחכה קצת</strong>. אולי האפליקציה תרצה לשלוח דאטה בקרוב (Echo, response) — אז ה-ACK ייצא יחד עם הדאטה (Piggyback).</p>
+      <h4>הכללים</h4>
+      <ul>
+        <li>מקבל מחכה <strong>עד 200ms</strong> לסגמנט הבא או לדאטה מהאפליקציה.</li>
+        <li>אם בתוך 200ms הגיע סגמנט נוסף בסדר — שולח ACK אחד שמאשר את שניהם.</li>
+        <li>אם הגיע סגמנט לא בסדר — שולח <strong>Duplicate ACK</strong> מיד (לא מחכה).</li>
+        <li>אם פג ה-200ms ולא קרה כלום — שולח ACK בודד.</li>
+      </ul>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>סיטואציה אצל המקבל</th><th>תגובה</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>הגיע סגמנט בסדר, אין ACK ממתין</td><td>מחכה 200ms (Delayed ACK)</td></tr>
+      <tr><td>הגיע סגמנט בסדר, יש כבר ACK ממתין</td><td>שולח ACK מיד שמאשר את שניהם</td></tr>
+      <tr><td>הגיע סגמנט לא בסדר</td><td>שולח Duplicate ACK מיד</td></tr>
+      <tr><td>חסר בסדר (חור)</td><td>שולח Duplicate ACK</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Nagle's Algorithm — חיסכון בסגמנטים קטנים</h2>
+
+  <div class="box theory">
+    <div class="box-head"><span class="icon">📘</span>הבעיה</div>
+    <div class="box-body">
+      <p>אפליקציה ששולחת סגמנטים קטנים (כמו ssh — כל הקלדה הולכת בנפרד). ‎2 בתים נתונים + ‎40 בתים הדרים = 95% תקורה. בזבוז עצום.</p>
+    </div>
+  </div>
+
+  <div class="box theory">
+    <div class="box-head"><span class="icon">📘</span>האלגוריתם</div>
+    <div class="box-body">
+      <p><strong>לא לשלוח מידע חדש קטן עד שמקבלים ACK על כל מה ששלחת עד עכשיו.</strong></p>
+      <h4>במילים אחרות</h4>
+      <ul>
+        <li>אם הרשת <strong>פנויה</strong> — ACK חוזר מהר. אין מה לאגד, הסגמנט הקטן יוצא מיד.</li>
+        <li>אם הרשת <strong>עמוסה</strong> — ACK איטי. השולח אוגר הודעות קטנות עד שמגיע ACK או עד שיש מספיק לסגמנט מלא (MSS).</li>
+      </ul>
+      <p><strong>תוצאה:</strong> סגמנטים קטנים יוצאים רק כשהרשת פנויה. כשעמוסה — מאגדים אותם לסגמנטים גדולים יותר.</p>
+    </div>
+  </div>
+
+  <div class="keypoint">
+    כלל הזהב של Nagle: <strong>שלח סגמנט קטן אם — או שיש ACK לכולם הקודמים, או שצברת מספיק לסגמנט מלא (MSS).</strong>
+  </div>
+
+  <h2>תרגיל</h2>
+
+  <div class="exercise-card">
+    <div class="exercise-q">
+      <span class="exercise-tag">תרגול · Flow Control vs Congestion Control</span>
+      <p>הסבר את ההבדל בין <strong>Flow Control</strong> ל-<strong>Congestion Control</strong>. שניהם מאטים את השולח — אז מה ההבדל?</p>
+    </div>
+    <button class="reveal-btn">הראה פתרון</button>
+    <div class="solution">
+      <div class="step">
+        <div class="step-label">Flow Control (בקרת זרימה)</div>
+        <ul>
+          <li><strong>מטרה:</strong> להגן על <strong>המקבל</strong> מההצפה.</li>
+          <li><strong>מי שולט:</strong> המקבל — בעזרת שדה Receive Window.</li>
+          <li><strong>מה בוחנים:</strong> כמה מקום פנוי בבאפר של המקבל.</li>
+          <li><strong>זה דיאלוג של 2:</strong> שולח ומקבל.</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-label">Congestion Control (בקרת גודש)</div>
+        <ul>
+          <li><strong>מטרה:</strong> להגן על <strong>הרשת</strong> מההצפה.</li>
+          <li><strong>מי שולט:</strong> השולח — לפי סימני גודש (אובדן, RTT).</li>
+          <li><strong>מה בוחנים:</strong> מצב הרשת — האם יש תורים, האם פאקטות אובדות.</li>
+          <li><strong>זה דיאלוג של רבים:</strong> כל השולחים ברשת.</li>
+        </ul>
+      </div>
+      <div class="final-answer">Flow = מקבל מאט שולח. Congestion = רשת מאטה שולחים. שניהם פועלים בו-זמנית — השולח מוגבל ב-min(RW, CongestionWindow).</div>
+    </div>
+  </div>
+
+  <div class="box summary">
+    <div class="box-head"><span class="icon">📌</span>סיכום הפרק</div>
+    <div class="box-body">
+      <ul>
+        <li><strong>Flow Control</strong> = המקבל שולט בשולח, הגנה על הבאפר</li>
+        <li><strong>RW</strong> = שדה ‎16 ביט בכותרת TCP — כמה מקום פנוי</li>
+        <li>השולח מוגבל: LastByteSent − LastByteAcked ≤ RW</li>
+        <li>סגמנטים לא-בסדר <strong>לא מקטינים</strong> את RW</li>
+        <li><strong>Delayed ACK</strong>: מקבל מחכה 200ms לפני שליחת ACK (אולי יצרף עם דאטה)</li>
+        <li><strong>Nagle</strong>: השולח אוגר סגמנטים קטנים עד שמגיע ACK או צבר MSS</li>
+        <li><strong>הבדל מ-Congestion</strong>: Flow = מקבל. Congestion = רשת.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- chapter content ends above this line -->
+
+
+<nav class="pager" aria-label="ניווט בין נושאים">
+  <a class="prev" href="09-trans-tcp.html"><span class="dir">→ לנושא הקודם</span><span class="name">TCP — מבנה</span></a>
+  <a class="next" href="11-trans-handshake.html"><span class="dir">לנושא הבא ←</span><span class="name">הקמת וסגירת קשר</span></a>
+</nav>
+
+</main>
+
+</div>
+
+<script>
+/* ===== glossary-tooltips-v1 =====
+   Wraps known technical terms in <span class="gloss" data-tip="..."> after
+   KaTeX finishes rendering. DOM TreeWalker on text nodes only, so it never
+   touches attributes, math, code blocks, links, or the sidebar. */
+(function () {
+  const GLOSSARY = {
+    // --- Transport ---
+    'TCP': 'Transmission Control Protocol — פרוטוקול תעבורה אמין ומבוסס-חיבור בשכבה 4. מבטיח סדר וללא איבוד.',
+    'UDP': 'User Datagram Protocol — פרוטוקול תעבורה ללא חיבור בשכבה 4. מהיר, בלי ערבויות.',
+    'RUDP': 'Reliable UDP — תוספת מנגנוני אמינות (ACK, מספור) מעל UDP באפליקציה.',
+    'RTT': 'Round Trip Time — הזמן שלוקח לחבילה להגיע ליעד ולחזור עם אישור.',
+    'ACK': 'Acknowledgment — אישור קבלה של סגמנט/פריים.',
+    'SEQ': 'Sequence Number — מספר סידורי של הבית הראשון בסגמנט TCP.',
+    'ISN': 'Initial Sequence Number — מספר הסידורי ההתחלתי שנבחר אקראית ב-handshake.',
+    'SYN': 'Synchronize — דגל TCP לפתיחת חיבור (שלב 1 ו-2 ב-3-Way Handshake).',
+    'FIN': 'Finish — דגל TCP לסגירה מסודרת של חיבור.',
+    'MSS': 'Maximum Segment Size — גודל מרבי של חלק הנתונים בסגמנט TCP.',
+    'RDT': 'Reliable Data Transfer — משפחת פרוטוקולים תיאורטיים (rdt1.0–3.0) להעברה אמינה.',
+    'CW': 'Congestion Window — חלון הגודש: כמה בייטים מותר לשלוח בלי אישור, לפי מצב הרשת.',
+    'RW': 'Receive Window — חלון הקבלה: כמה מקום פנוי נשאר בבאפר של המקבל (בקרת זרימה).',
+    'AIMD': 'Additive Increase Multiplicative Decrease — עלייה ליניארית, ירידה כפולית: העיקרון של בקרת גודש ב-TCP.',
+    'ssthresh': 'Slow Start Threshold — הסף שמפריד בין Slow Start (גדילה מעריכית) ל-Congestion Avoidance (ליניארית).',
+
+    // --- Network ---
+    'IP': 'Internet Protocol — פרוטוקול הרשת בשכבה 3: כתובות וניתוב, ללא אמינות.',
+    'IPv4': 'Internet Protocol version 4 — הגרסה הקלאסית, כתובות של 32 ביט.',
+    'IPv6': 'Internet Protocol version 6 — הגרסה החדשה, כתובות של 128 ביט.',
+    'NAT': 'Network Address Translation — מיפוי כתובות פרטיות לכתובת ציבורית אחת לפי פורטים.',
+    'DHCP': 'Dynamic Host Configuration Protocol — מקצה כתובות IP אוטומטית (תהליך DORA).',
+    'DORA': 'Discover, Offer, Request, ACK — ארבעת שלבי הקצאת כתובת ב-DHCP.',
+    'ICMP': 'Internet Control Message Protocol — הודעות שגיאה ובקרה בשכבת הרשת (ping, TTL exceeded).',
+    'TTL': 'Time To Live — מונה קפיצות בכותרת IP; יורד ב-1 בכל ראוטר, ב-0 החבילה נזרקת.',
+    'CIDR': 'Classless Inter-Domain Routing — רישום כתובת/פריפיקס (למשל ‎/24) במקום מחלקות.',
+    'AS': 'Autonomous System — מערכת אוטונומית: אוסף רשתות תחת ניהול אחד (למשל ספקית).',
+    'OSPF': 'Open Shortest Path First — פרוטוקול ניתוב תוך-AS מבוסס Link State (דייקסטרה).',
+    'BGP': 'Border Gateway Protocol — פרוטוקול הניתוב בין AS-ים, מבוסס Path Vector ומדיניות.',
+    'RIP': 'Routing Information Protocol — פרוטוקול ניתוב מבוסס Distance Vector (בלמן-פורד).',
+    'DV': 'Distance Vector — גישת ניתוב מבוזרת: כל ראוטר משתף שכנים בטבלת המרחקים שלו.',
+    'LS': 'Link State — גישת ניתוב גלובלית: כל ראוטר מכיר את כל הטופולוגיה ומריץ דייקסטרה.',
+
+    // --- Application ---
+    'HTTP': 'Hypertext Transfer Protocol — פרוטוקול הבקשות/תשובות של ה-web, מעל TCP פורט 80.',
+    'HTTPS': 'HTTP Secure — HTTP מעל SSL/TLS, פורט 443, לתקשורת מוצפנת.',
+    'HTML': 'Hypertext Markup Language — שפת הסימון של דפי web.',
+    'DNS': 'Domain Name System — ממיר שמות דומיין לכתובות IP. היררכי, מעל UDP פורט 53.',
+    'TLD': 'Top Level Domain — הרמה העליונה בהיררכיית DNS‏ (com, org, il).',
+    'CNAME': 'Canonical Name — רשומת DNS שממפה שם נרדף לשם הקנוני.',
+    'ICANN': 'Internet Corporation for Assigned Names and Numbers — הגוף שמנהל שמות דומיין וכתובות.',
+    'SMTP': 'Simple Mail Transfer Protocol — פרוטוקול שליחת דואר, מעל TCP פורט 25.',
+    'IMAP': 'Internet Message Access Protocol — פרוטוקול גישה לתיבת דואר בשרת.',
+    'FTP': 'File Transfer Protocol — פרוטוקול העברת קבצים עם חיבור בקרה וחיבור נתונים נפרדים.',
+    'URL': 'Uniform Resource Locator — כתובת של משאב ברשת: פרוטוקול, שרת ונתיב.',
+    'P2P': 'Peer to Peer — ארכיטקטורה בלי שרת מרכזי: הקצוות מדברים ישירות זה עם זה.',
+    'API': 'Application Programming Interface — ממשק תכנותי בין רכיבי תוכנה (למשל Socket API).',
+
+    // --- Link ---
+    'MAC': 'Media Access Control — כתובת חומרה של 48 ביט של כרטיס הרשת; וגם שכבת הגישה לערוץ.',
+    'ARP': 'Address Resolution Protocol — מוצא כתובת MAC עבור כתובת IP ידועה באותה רשת.',
+    'CSMA/CD': 'CSMA with Collision Detection — מאזין לפני שידור ומזהה התנגשות תוך כדי (Ethernet קווי).',
+    'CSMA': 'Carrier Sense Multiple Access — פרוטוקול גישה לערוץ: מאזין לפני ששולח.',
+    'ALOHA': 'פרוטוקול הגישה האקראית הראשון: משדרים בלי להאזין. ניצולת מקס׳ 18% (או 37% ב-Slotted).',
+    'TDMA': 'Time Division Multiple Access — חלוקת הערוץ לפרוסות זמן קבועות בין המשתמשים.',
+    'FDMA': 'Frequency Division Multiple Access — חלוקת הערוץ לתדרים קבועים בין המשתמשים.',
+    'CRC': 'Cyclic Redundancy Check — קוד גילוי שגיאות שמחושב לכל פריים בשכבת הקישור.',
+    'OUI': 'Organizationally Unique Identifier — שלושת הבייטים הראשונים בכתובת MAC, מזהים את היצרן.',
+    'LAN': 'Local Area Network — רשת מקומית (בניין/קמפוס), בדרך כלל Ethernet או WiFi.',
+    'Ethernet': 'טכנולוגיית ה-LAN הקווית הנפוצה: פריימים עם כתובות MAC, ‏CSMA/CD היסטורית.',
+
+    // --- Security ---
+    'RSA': 'Rivest–Shamir–Adleman — אלגוריתם הצפנה אסימטרי (מפתח ציבורי) מבוסס פירוק לגורמים.',
+    'AES': 'Advanced Encryption Standard — אלגוריתם ההצפנה הסימטרי הסטנדרטי כיום.',
+    '3DES': 'Triple DES — הפעלת DES שלוש פעמים ברצף לחיזוק המפתח.',
+    'DES': 'Data Encryption Standard — אלגוריתם הצפנה סימטרי ישן (מפתח 56 ביט, נחשב חלש).',
+    'TLS': 'Transport Layer Security — היורש המודרני של SSL; מצפין תעבורה מעל TCP.',
+    'SSL': 'Secure Sockets Layer — שכבת הצפנה בין האפליקציה ל-TCP‏; הבסיס של HTTPS.',
+    'PK': 'Public Key — המפתח הציבורי: גלוי לכולם, מצפינים איתו הודעות אל הבעלים.',
+    'SK': 'Secret/Private Key — המפתח הפרטי: רק הבעלים מחזיק בו, מפענח וחותם.',
+    'DDoS': 'Distributed Denial of Service — מתקפת מניעת שירות ממקורות רבים במקביל.',
+    'DoS': 'Denial of Service — מתקפה שמציפה שרת בבקשות עד שקורס או לא זמין.',
+
+    // --- General ---
+    'ISP': 'Internet Service Provider — ספקית שירותי אינטרנט.',
+    'OSI': 'Open Systems Interconnection — מודל 7 השכבות של ISO.',
+    'ISO': 'International Organization for Standardization — ארגון התקנים הבינלאומי.',
+    'MTU': 'Maximum Transmission Unit — הגודל המרבי של חבילה בלינק; מעליו נדרשת פרגמנטציה.',
+  };
+
+  const TERMS = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length);
+  const PATTERN = TERMS
+    .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|');
+  // Whole word: no Latin letter/digit before or after (Hebrew around is fine)
+  const RE = new RegExp('(?<![A-Za-z0-9])(' + PATTERN + ')(?![A-Za-z0-9])', 'g');
+
+  const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'CODE', 'PRE', 'TEXTAREA', 'A', 'BUTTON', 'H1']);
+
+  function insideSkipped(el) {
+    for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
+      if (SKIP_TAGS.has(n.tagName)) return true;
+      const c = n.classList;
+      if (c && (c.contains('gloss') || c.contains('katex') ||
+                c.contains('katex-display') || c.contains('sidebar'))) return true;
+    }
+    return false;
+  }
+
+  function run() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const t = node.nodeValue;
+        if (!t || t.indexOf('$') !== -1) return NodeFilter.FILTER_REJECT; // leave raw math alone
+        RE.lastIndex = 0;
+        if (!RE.test(t)) return NodeFilter.FILTER_REJECT;
+        if (insideSkipped(node.parentElement)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    for (const node of nodes) {
+      const text = node.nodeValue;
+      const frag = document.createDocumentFragment();
+      let last = 0, m;
+      RE.lastIndex = 0;
+      while ((m = RE.exec(text)) !== null) {
+        if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        const span = document.createElement('span');
+        span.className = 'gloss';
+        span.setAttribute('data-tip', GLOSSARY[m[1]]);
+        span.textContent = m[1];
+        frag.appendChild(span);
+        last = m.index + m[1].length;
+      }
+      if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+      node.parentNode.replaceChild(frag, node);
+    }
+
+    // Touch devices: tap toggles the tooltip (hover doesn't exist on mobile)
+    document.body.addEventListener('click', (e) => {
+      const g = e.target.closest('.gloss');
+      document.querySelectorAll('.gloss.tap').forEach(x => { if (x !== g) x.classList.remove('tap'); });
+      if (g) g.classList.toggle('tap');
+    });
+  }
+
+  // Registered after the head script's DOMContentLoaded listener,
+  // so this runs AFTER renderMathInElement has replaced $...$ with KaTeX spans.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
+</script>
+
+</body>
+</html>

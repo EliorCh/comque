@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מבוא לתקשורת מחשבים · הכנה למבחן</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbf9f3; --bg-paper: #fffefa; --ink: #1c1917; --ink-soft: #44403c; --ink-mute: #78716c;
+    --rule: #e7e5e0; --indigo-9: #312e81; --indigo-7: #4f46e5; --indigo-1: #eef2ff;
+    --c-theory-h: #1d4ed8; --c-theory-bg: #eff6ff; --c-theory-edge: #bfdbfe;
+    --c-formula-h: #b45309; --c-formula-bg: #fef9e7; --c-formula-edge: #fcd34d;
+    --c-example-h: #047857; --c-example-bg: #ecfdf5; --c-example-edge: #a7f3d0;
+    --c-warn-h: #be123c; --c-warn-bg: #fff1f2; --c-warn-edge: #fecdd3;
+    --c-exercise-h: #6d28d9; --c-exercise-bg: #f5f3ff; --c-exercise-edge: #ddd6fe;
+    --c-physical-h: #0891b2; --c-physical-bg: #ecfeff; --c-physical-edge: #a5f3fc;
+    --shadow-sm: 0 1px 2px rgba(28,25,23,.04), 0 1px 3px rgba(28,25,23,.06);
+    --shadow: 0 4px 12px rgba(28,25,23,.05), 0 1px 3px rgba(28,25,23,.04);
+    --serif: 'Frank Ruhl Libre', Georgia, serif;
+    --sans: 'Assistant', -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.7; font-size: 17px; min-height: 100vh;
+    background-image: radial-gradient(circle at 15% 0%, rgba(99,102,241,.05), transparent 45%), radial-gradient(circle at 85% 100%, rgba(245,158,11,.04), transparent 45%);
+    background-attachment: fixed; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 64px 32px 100px; }
+  .hero { text-align: center; padding: 32px 0 56px; border-bottom: 1px solid var(--rule); margin-bottom: 48px; }
+  .hero .badge { display: inline-block; font-size: 12px; font-weight: 700; color: var(--indigo-7); letter-spacing: .18em; text-transform: uppercase; background: var(--indigo-1); padding: 8px 16px; border-radius: 99px; margin-bottom: 20px; }
+  .hero h1 { font-family: var(--serif); font-size: 64px; font-weight: 700; line-height: 1.1; letter-spacing: -.025em; color: var(--ink); margin-bottom: 20px; }
+  .hero .sub { font-size: 22px; color: var(--ink-soft); max-width: 720px; margin: 0 auto 22px; font-weight: 400; line-height: 1.5; }
+  .hero .meta { font-size: 14px; color: var(--ink-mute); margin-top: 14px; }
+  .hero .meta span { margin: 0 12px; }
+  .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .15em; color: var(--indigo-7); font-weight: 700; margin: 48px 0 18px; padding-right: 4px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+  .card { background: var(--bg-paper); border: 1px solid var(--rule); border-radius: 14px; padding: 24px; text-decoration: none; color: var(--ink); transition: all .2s ease; display: flex; flex-direction: column; box-shadow: var(--shadow-sm); position: relative; }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--indigo-7); }
+  .card.pending { opacity: .5; cursor: not-allowed; pointer-events: none; }
+  .card.pending::after { content: 'בקרוב'; position: absolute; top: 12px; left: 12px; background: var(--c-warn-bg); color: var(--c-warn-h); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 99px; letter-spacing: .08em; }
+  .card-num { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--indigo-7); font-weight: 700; margin-bottom: 8px; letter-spacing: .05em; }
+  .card-title { font-family: var(--serif); font-size: 21px; font-weight: 700; line-height: 1.25; margin-bottom: 10px; color: var(--ink); }
+  .card-desc { font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; flex: 1; }
+  .card-tags { margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 10.5px; padding: 3px 9px; border-radius: 99px; background: var(--c-theory-bg); color: var(--c-theory-h); border: 1px solid var(--c-theory-edge); font-weight: 600; letter-spacing: .03em; }
+  .tag.formula { background: var(--c-formula-bg); color: var(--c-formula-h); border-color: var(--c-formula-edge); }
+  .tag.exercise { background: var(--c-exercise-bg); color: var(--c-exercise-h); border-color: var(--c-exercise-edge); }
+  .tag.warn { background: var(--c-warn-bg); color: var(--c-warn-h); border-color: var(--c-warn-edge); }
+  .layer-banner { display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-radius: 14px; margin: 36px 0 16px; background: linear-gradient(90deg, var(--c-theory-bg) 0%, transparent 100%); border-right: 4px solid var(--c-theory-h); }
+  .layer-banner.app { background: linear-gradient(90deg, var(--c-example-bg) 0%, transparent 100%); border-right-color: var(--c-example-h); }
+  .layer-banner.transport { background: linear-gradient(90deg, var(--c-formula-bg) 0%, transparent 100%); border-right-color: var(--c-formula-h); }
+  .layer-banner.network { background: linear-gradient(90deg, var(--c-exercise-bg) 0%, transparent 100%); border-right-color: var(--c-exercise-h); }
+  .layer-banner.link { background: linear-gradient(90deg, var(--c-warn-bg) 0%, transparent 100%); border-right-color: var(--c-warn-h); }
+  .layer-banner.physical { background: linear-gradient(90deg, var(--c-physical-bg) 0%, transparent 100%); border-right-color: var(--c-physical-h); }
+  .layer-banner.security { background: linear-gradient(90deg, #fce7f3 0%, transparent 100%); border-right-color: #be185d; }
+  .layer-icon { font-size: 32px; line-height: 1; }
+  .layer-title { font-family: var(--serif); font-size: 26px; font-weight: 700; color: var(--ink); }
+  .layer-sub { font-size: 14px; color: var(--ink-mute); margin-top: 2px; }
+  .progress-banner { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #fff; border-radius: 16px; padding: 24px 32px; margin-bottom: 32px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; box-shadow: var(--shadow); }
+  .progress-banner h3 { font-family: var(--serif); font-size: 22px; margin-bottom: 6px; font-weight: 700; }
+  .progress-banner p { color: #c7d2fe; font-size: 14.5px; }
+  .progress-stat { text-align: center; min-width: 100px; }
+  .progress-stat .num { font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 800; color: #fbbf24; line-height: 1; }
+  .progress-stat .lbl { font-size: 11px; color: #a5b4fc; text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
+  @media (max-width: 700px) { .hero h1 { font-size: 42px; } .hero .sub { font-size: 18px; } .wrap { padding: 32px 20px 60px; } .progress-banner { grid-template-columns: 1fr; text-align: center; } }
+
+/* ===== glossary-tooltips-v1 ===== */
+.gloss {
+  border-bottom: 1px dashed var(--indigo-3, #c7d2fe);
+  cursor: help;
+  position: relative;
+}
+.gloss::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 50%;
+  transform: translateX(50%);
+  background: var(--ink, #1c1917);
+  color: var(--bg, #fbf9f3);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.55;
+  white-space: normal;
+  width: max-content;
+  max-width: 320px;
+  z-index: 100;
+  direction: rtl;
+  text-align: right;
+  box-shadow: 0 4px 16px rgba(60,55,50,0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  font-family: 'Assistant', sans-serif;
+}
+.gloss::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 3px);
+  right: 50%;
+  transform: translateX(50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink, #1c1917);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.gloss:hover::after, .gloss:hover::before,
+.gloss:focus::after, .gloss:focus::before,
+.gloss.tap::after,  .gloss.tap::before {
+  opacity: 1;
+}
+
+/* ===== additions-v2 ===== */
+.comque-banner { display:flex; align-items:center; gap:16px; margin:26px 0; padding:18px 22px; border:1.5px solid var(--indigo-3, #c7d2fe); border-radius:14px; background:var(--indigo-1, #eef2ff); text-decoration:none; transition:box-shadow .15s, border-color .15s; }
+.comque-banner:hover { border-color: var(--indigo-7, #4f46e5); box-shadow:0 3px 14px rgba(79,70,229,.14); }
+.comque-banner .cq-icon { font-size:28px; }
+.comque-banner .cq-title { font-weight:800; font-size:16.5px; color:var(--indigo-9, #312e81); }
+.comque-banner .cq-sub { font-size:13.5px; color:var(--ink-soft, #44403c); margin-top:2px; }
+.card.sum-card { border-style: dashed; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<div class="hero">
+  <span class="badge">הכנה למבחן · MTA</span>
+  <h1>מבוא לתקשורת מחשבים</h1>
+  <p class="sub">אתר חזרה מקיף בנוי לפי המודל השכבתי. כל שכבה עם תת-נושאים, תרגילים פתורים, ודיאגרמות.</p>
+  <div class="meta"><span>ד״ר מור פרי</span>·<span>ד״ר הדר בינסקי</span>·<span>סמסטר ב' תשפ״ו</span></div>
+</div>
+
+<div class="progress-banner">
+  <div>
+    <h3>אסטרטגיית חזרה מומלצת</h3>
+    <p>ההרצאות מסודרות לפי המבנה השכבתי של האינטרנט (מלמעלה למטה). התחל במבוא, ואחר כך עבור שכבה אחר שכבה. כל נושא בודד הוא דף קצר עם תאוריה, דוגמאות פתורות, וקטעים מתוך תרגילי הבית של ד״ר בינסקי.</p>
+  </div>
+  <div class="progress-stat">
+    <div class="num">35/35</div>
+    <div class="lbl">דפים מוכנים</div>
+  </div>
+</div>
+
+<a class="comque-banner" href="https://eliorch.github.io/comque" target="_blank" rel="noopener">
+  <div class="cq-icon">🎯</div>
+  <div>
+    <div class="cq-title">אתר השאלות — תרגול למבחן</div>
+    <div class="cq-sub">סיימת לקרוא נושא? עבור לתרגל שאלות עליו באתר המשלים.</div>
+  </div>
+</a>
+
+<div class="layer-banner">
+  <div class="layer-icon">📘</div>
+  <div>
+    <div class="layer-title">מבוא</div>
+    <div class="layer-sub">המבנה של האינטרנט, פרוטוקולים, ושכבות. השהיות יסודיות.</div>
+  </div>
+</div>
+<div class="grid">
+  <a href="00-intro.html" class="card">
+    <div class="card-num">0.1</div>
+    <div class="card-title">רשת האינטרנט והשכבות</div>
+    <div class="card-desc">מבנה רשת — מכשירי קצה, נתבים, לינקים. המודל ה-5 שכבתי, פרוטוקולים, אינקפסולציה.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span></div>
+  </a>
+  <a href="01-delays.html" class="card">
+    <div class="card-num">0.2</div>
+    <div class="card-title">השהיות ברשת</div>
+    <div class="card-desc">4 סוגי השהיות: עיבוד, תורים, טרנסמישן, פרופגיישן. חישובים מתרגיל 1.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag formula">חישובים</span><span class="tag exercise">תרגיל</span></div>
+  </a>
+</div>
+
+<div class="layer-banner app">
+  <div class="layer-icon">1️⃣</div>
+  <div>
+    <div class="layer-title">שכבת האפליקציה</div>
+    <div class="layer-sub">איך אפליקציות (HTTP, DNS, Mail) משתמשות ברשת — סוקטים, ופרוטוקולים בין-משתמש.</div>
+  </div>
+</div>
+<div class="grid">
+  <a href="02-app-sockets.html" class="card">
+    <div class="card-num">1.1</div>
+    <div class="card-title">סוקטים, לקוח-שרת, P2P</div>
+    <div class="card-desc">שתי ארכיטקטורות תקשורת. סוקט כממשק לתעבורה. בחירת שירות לפי צרכי האפליקציה.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span></div>
+  </a>
+  <a href="03-app-http.html" class="card">
+    <div class="card-num">1.2</div>
+    <div class="card-title">HTTP</div>
+    <div class="card-desc">פרוטוקול ה-Web. Persistent vs Non, Pipelining, Concurrent, שיטות (GET/POST), קודי תגובה.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">תרגיל</span></div>
+  </a>
+  <a href="04-app-proxy-cache.html" class="card">
+    <div class="card-num">1.3</div>
+    <div class="card-title">Proxy, Cache, Conditional GET</div>
+    <div class="card-desc">איך Web Cache חוסך זמן ורוחב פס. נוסחת זמן הבאה ממוצע. Conditional GET עם If-Modified-Since.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag formula">נוסחה</span><span class="tag exercise">תרגיל</span></div>
+  </a>
+  <a href="05-app-cookies.html" class="card">
+    <div class="card-num">1.4</div>
+    <div class="card-title">Cookies</div>
+    <div class="card-desc">איך HTTP, שהוא stateless, "זוכר" אותנו. תהליך 4 שלבים, יישומים, סוגיות פרטיות.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span></div>
+  </a>
+  <a href="06-app-dns.html" class="card">
+    <div class="card-num">1.5</div>
+    <div class="card-title">DNS</div>
+    <div class="card-desc">היררכיה — Root, TLD, Authoritative. שאילתה איטרטיבית vs רקורסיבית. ‎4 סוגי רשומות. nslookup.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">תרגיל</span></div>
+  </a>
+  <a href="sum-app.html" class="card sum-card">
+    <div class="card-num">📌</div>
+    <div class="card-title">סיכום — שכבת האפליקציה</div>
+    <div class="card-desc">מפת השכבה בדקה: HTTP, ‏Proxy, ‏Cookies, ‏DNS — נוסחאות וטעויות נפוצות.</div>
+    <div class="card-tags"><span class="tag">סיכום שכבה</span></div>
+  </a>
+</div>
+
+<div class="layer-banner transport">
+  <div class="layer-icon">2️⃣</div>
+  <div>
+    <div class="layer-title">שכבת התעבורה</div>
+    <div class="layer-sub">UDP ו-TCP — איך מעבירים נתונים בין תהליכים בצורה אמינה (או לא) ועם בקרת גודש.</div>
+  </div>
+</div>
+<div class="grid">
+  <a href="07-trans-udp.html" class="card">
+    <div class="card-num">2.1</div>
+    <div class="card-title">UDP ומולטיפלקסינג</div>
+    <div class="card-desc">פרוטוקול לא-אמין. Checksum. די-מולטיפלקסינג של UDP vs TCP.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">תרגיל</span></div>
+  </a>
+  <a href="08-trans-rdt.html" class="card">
+    <div class="card-num">2.2</div>
+    <div class="card-title">העברה אמינה (RDT)</div>
+    <div class="card-desc">Stop&Wait, Go-Back-N, Selective Repeat. ניצולת ערוץ. צנרת.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag formula">חישובים</span><span class="tag exercise">RUDP</span></div>
+  </a>
+  <a href="09-trans-tcp.html" class="card">
+    <div class="card-num">2.3</div>
+    <div class="card-title">TCP — מבנה</div>
+    <div class="card-desc">סגמנט, SeqNum, AckNum, חישוב RTT, Timeout, מנגנון Delayed ACK ו-Nagle.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag formula">נוסחאות</span><span class="tag exercise">תרגיל</span></div>
+  </a>
+  <a href="10-trans-flow.html" class="card">
+    <div class="card-num">2.4</div>
+    <div class="card-title">בקרת זרימה</div>
+    <div class="card-desc">RecWindow, RecBuffer, יחסי משמעות. הבדל מבקרת גודש.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span></div>
+  </a>
+  <a href="11-trans-handshake.html" class="card">
+    <div class="card-num">2.5</div>
+    <div class="card-title">הקמת וסגירת קשר</div>
+    <div class="card-desc">3-Way HandShake (SYN/SYNACK/ACK). FIN. בעיית Delayed Duplicate.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">תרגיל</span></div>
+  </a>
+  <a href="12-trans-congestion.html" class="card">
+    <div class="card-num">2.6</div>
+    <div class="card-title">בקרת גודש</div>
+    <div class="card-desc">AIMD, Slow Start, ssthresh, Tahoe vs Reno, Fast Retransmit, Fast Recovery.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag formula">חישובים</span><span class="tag exercise">טבלה 13</span></div>
+  </a>
+  <a href="sum-trans.html" class="card sum-card">
+    <div class="card-num">📌</div>
+    <div class="card-title">סיכום — שכבת התעבורה</div>
+    <div class="card-desc">מ-UDP ועד בקרת גודש: כל הנוסחאות והמלכודות של TCP במקום אחד.</div>
+    <div class="card-tags"><span class="tag">סיכום שכבה</span></div>
+  </a>
+</div>
+
+<div class="layer-banner network">
+  <div class="layer-icon">3️⃣</div>
+  <div>
+    <div class="layer-title">שכבת הרשת</div>
+    <div class="layer-sub">איך פאקטות מנותבות בין מחשבים — IP, פרגמנטציה, ראוטינג, DHCP, NAT, IPv6.</div>
+  </div>
+</div>
+<div class="grid">
+  <a href="13-net-intro.html" class="card">
+    <div class="card-num">3.1</div>
+    <div class="card-title">IP דאטהגרם</div>
+    <div class="card-desc">פורוורדינג vs ראוטינג. מבנה ההדר. שדות TTL, Protocol, Checksum. LPM.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">תרגיל</span></div>
+  </a>
+  <a href="14-net-fragmentation.html" class="card">
+    <div class="card-num">3.2</div>
+    <div class="card-title">פרגמנטציה</div>
+    <div class="card-desc">MTU, חלוקה, ID/MF/Offset. הרכבה ביעד. דוגמת ID=422 עם 8 פרגמנטים.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">ID=422</span></div>
+  </a>
+  <a href="15-net-ip-addressing.html" class="card">
+    <div class="card-num">3.3</div>
+    <div class="card-title">כתובות IP + CIDR</div>
+    <div class="card-desc">סאבנטים, CIDR, Subnet Mask, AND לוגי. כתובות פרטיות וברודקסט.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag formula">חישובים</span></div>
+  </a>
+  <a href="16-net-dhcp.html" class="card">
+    <div class="card-num">3.4</div>
+    <div class="card-title">DHCP</div>
+    <div class="card-desc">‎4 הודעות: DORA. למה Broadcast. Lease time. פורטים 67/68.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span></div>
+  </a>
+  <a href="17-net-nat-ipv6.html" class="card">
+    <div class="card-num">3.5</div>
+    <div class="card-title">NAT, IPv6, ICMP</div>
+    <div class="card-desc">מיפוי כתובות. ‎128 ביטים. Tunneling. ping ו-traceroute.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">תרגיל NAT</span></div>
+  </a>
+  <a href="18-net-routing.html" class="card">
+    <div class="card-num">3.6</div>
+    <div class="card-title">ניתוב — DV + LS</div>
+    <div class="card-desc">Bellman-Ford vs Dijkstra. ספירה-לאינסוף. ‎RIP=16 ב-DV.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">RIP=16</span></div>
+  </a>
+  <a href="19-net-ospf-bgp.html" class="card">
+    <div class="card-num">3.7</div>
+    <div class="card-title">OSPF + BGP</div>
+    <div class="card-desc">‎AS-ים והיררכיה. Intra-AS (OSPF). Inter-AS (BGP). שיקולי מדיניות.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span></div>
+  </a>
+  <a href="sum-net.html" class="card sum-card">
+    <div class="card-num">📌</div>
+    <div class="card-title">סיכום — שכבת הרשת</div>
+    <div class="card-desc">פרגמנטציה, CIDR‏, DORA וניתוב — השורה התחתונה של שבעת הפרקים.</div>
+    <div class="card-tags"><span class="tag">סיכום שכבה</span></div>
+  </a>
+</div>
+
+<div class="layer-banner link">
+  <div class="layer-icon">4️⃣</div>
+  <div>
+    <div class="layer-title">שכבת הקישור</div>
+    <div class="layer-sub">העברה בין שכנים מחוברים פיזית — ALOHA, CSMA, Ethernet, MAC, ARP, סוויצ'ים.</div>
+  </div>
+</div>
+<div class="grid">
+  <a href="20-link-framing.html" class="card">
+    <div class="card-num">4.1</div>
+    <div class="card-title">Framing ושירותים</div>
+    <div class="card-desc">עטיפת דאטהגרם בפריים. Header+Trailer. ‎7 שירותים. ‎TDMA/FDMA vs Random Access.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span></div>
+  </a>
+  <a href="21-link-aloha.html" class="card">
+    <div class="card-num">4.2</div>
+    <div class="card-title">ALOHA</div>
+    <div class="card-desc">פיורית ו-Slotted. ניצולת ‎18%/‎37%. ‎חלון התנגשות. ‎מבוזר.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">ALOHA vs Slotted</span></div>
+  </a>
+  <a href="22-link-csma.html" class="card">
+    <div class="card-num">4.3</div>
+    <div class="card-title">CSMA + Ethernet</div>
+    <div class="card-desc">"תקשיב לפני שתדבר". Persistent/Non. CSMA/CD + JAM. ‎גודל פריים מינימלי. ‎Binary Backoff.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">CSMA vs ALOHA</span></div>
+  </a>
+  <a href="23-link-mac-arp.html" class="card">
+    <div class="card-num">4.4</div>
+    <div class="card-title">MAC + ARP</div>
+    <div class="card-desc">‎48 ביטים פיזיים. ‎OUI + Serial. ARP — מיפוי IP→MAC ב-LAN.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">MAC vs IP</span></div>
+  </a>
+  <a href="24-link-switches.html" class="card">
+    <div class="card-num">4.5</div>
+    <div class="card-title">סוויצ׳ים</div>
+    <div class="card-desc">‎Self-learning של טבלת MAC. ‎בידוד collision domains. ‎plug-and-play.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">תרגיל</span></div>
+  </a>
+  <a href="25-link-day-in-life.html" class="card">
+    <div class="card-num">4.6</div>
+    <div class="card-title">יום בחיי הודעה</div>
+    <div class="card-desc">‎13 הודעות: DHCP → ARP → DNS → 3WHS → HTTP. ‎סקירה אינטגרטיבית.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span></div>
+  </a>
+  <a href="sum-link.html" class="card sum-card">
+    <div class="card-num">📌</div>
+    <div class="card-title">סיכום — שכבת הקישור</div>
+    <div class="card-desc">ALOHA‏, CSMA/CD‏, ARP וסוויצ׳ים — הניצולות והכללים שחייבים לזכור.</div>
+    <div class="card-tags"><span class="tag">סיכום שכבה</span></div>
+  </a>
+</div>
+
+<div class="layer-banner physical">
+  <div class="layer-icon">5️⃣</div>
+  <div>
+    <div class="layer-title">השכבה הפיזית</div>
+    <div class="layer-sub">איך ביטים הופכים לאותות חשמליים, אופטיים, או גלי רדיו.</div>
+  </div>
+</div>
+<div class="grid">
+  <a href="26-phys-signals.html" class="card">
+    <div class="card-num">5.1</div>
+    <div class="card-title">אותות וביטים</div>
+    <div class="card-desc">סוגי לינקים — כבל, סיב, אלחוטי, לוויין. ‎NRZ, Manchester. ‎פרמטרים.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span></div>
+  </a>
+</div>
+
+<div class="layer-banner security">
+  <div class="layer-icon">🔐</div>
+  <div>
+    <div class="layer-title">אבטחה וקריפטוגרפיה</div>
+    <div class="layer-sub">איומי רשת, הצפנה סימטרית ואסימטרית, חתימה דיגיטלית, SSL/TLS. (מתוך תרגיל 4)</div>
+  </div>
+</div>
+<div class="grid">
+  <a href="27-sec-threats.html" class="card">
+    <div class="card-num">6.1</div>
+    <div class="card-title">איומים</div>
+    <div class="card-desc">Packet Sniffing, IP Spoofing, DoS/DDoS. ‎CIA Triad. ‎מנגנוני הגנה.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span></div>
+  </a>
+  <a href="28-sec-crypto.html" class="card">
+    <div class="card-num">6.2</div>
+    <div class="card-title">סימטרי vs אסימטרי</div>
+    <div class="card-desc">DES vs RSA. ‎יתרונות, חסרונות. ‎Brute force. ‎שילוב היברידי.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">DES vs RSA + 16!/6!</span></div>
+  </a>
+  <a href="29-sec-signatures.html" class="card">
+    <div class="card-num">6.3</div>
+    <div class="card-title">חתימה דיגיטלית</div>
+    <div class="card-desc">Hash + מפתח פרטי. ‎אימות. ‎ההבדל מהצפנה. ‎הצפנת סיסמה ב-PK.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">אליס/יובב</span></div>
+  </a>
+  <a href="30-sec-ssl.html" class="card">
+    <div class="card-num">6.4</div>
+    <div class="card-title">SSL/TLS</div>
+    <div class="card-desc">בין App ל-Transport. ‎Handshake. ‎שילוב אסימטרי+סימטרי. ‎HTTPS.</div>
+    <div class="card-tags"><span class="tag">תאוריה</span><span class="tag exercise">מה זה SSL</span></div>
+  </a>
+  <a href="sum-sec.html" class="card sum-card">
+    <div class="card-num">📌</div>
+    <div class="card-title">סיכום — אבטחה</div>
+    <div class="card-desc">הצפנה מול חתימה, brute force, ו-SSL — ההבדלים ששווים נקודות במבחן.</div>
+    <div class="card-tags"><span class="tag">סיכום שכבה</span></div>
+  </a>
+</div>
+
+<div class="section-label">חזרה</div>
+<div class="grid">
+  <a href="31-cheatsheet.html" class="card" style="grid-column: 1 / -1; background: var(--c-formula-bg); border-color: var(--c-formula-edge);">
+    <div class="card-num">📋</div>
+    <div class="card-title">דף נוסחאות / Cheat Sheet</div>
+    <div class="card-desc">סיכום קצר. ‎נוסחאות מפתח, טבלאות מהירות לכל שכבה, פיינטים נפוצים, ופורטים חשובים.</div>
+    <div class="card-tags"><span class="tag formula">להדפסה</span></div>
+  </a>
+</div>
+
+</div>
+
+<script>
+/* ===== glossary-tooltips-v1 =====
+   Wraps known technical terms in <span class="gloss" data-tip="..."> after
+   KaTeX finishes rendering. DOM TreeWalker on text nodes only, so it never
+   touches attributes, math, code blocks, links, or the sidebar. */
+(function () {
+  const GLOSSARY = {
+    // --- Transport ---
+    'TCP': 'Transmission Control Protocol — פרוטוקול תעבורה אמין ומבוסס-חיבור בשכבה 4. מבטיח סדר וללא איבוד.',
+    'UDP': 'User Datagram Protocol — פרוטוקול תעבורה ללא חיבור בשכבה 4. מהיר, בלי ערבויות.',
+    'RUDP': 'Reliable UDP — תוספת מנגנוני אמינות (ACK, מספור) מעל UDP באפליקציה.',
+    'RTT': 'Round Trip Time — הזמן שלוקח לחבילה להגיע ליעד ולחזור עם אישור.',
+    'ACK': 'Acknowledgment — אישור קבלה של סגמנט/פריים.',
+    'SEQ': 'Sequence Number — מספר סידורי של הבית הראשון בסגמנט TCP.',
+    'ISN': 'Initial Sequence Number — מספר הסידורי ההתחלתי שנבחר אקראית ב-handshake.',
+    'SYN': 'Synchronize — דגל TCP לפתיחת חיבור (שלב 1 ו-2 ב-3-Way Handshake).',
+    'FIN': 'Finish — דגל TCP לסגירה מסודרת של חיבור.',
+    'MSS': 'Maximum Segment Size — גודל מרבי של חלק הנתונים בסגמנט TCP.',
+    'RDT': 'Reliable Data Transfer — משפחת פרוטוקולים תיאורטיים (rdt1.0–3.0) להעברה אמינה.',
+    'CW': 'Congestion Window — חלון הגודש: כמה בייטים מותר לשלוח בלי אישור, לפי מצב הרשת.',
+    'RW': 'Receive Window — חלון הקבלה: כמה מקום פנוי נשאר בבאפר של המקבל (בקרת זרימה).',
+    'AIMD': 'Additive Increase Multiplicative Decrease — עלייה ליניארית, ירידה כפולית: העיקרון של בקרת גודש ב-TCP.',
+    'ssthresh': 'Slow Start Threshold — הסף שמפריד בין Slow Start (גדילה מעריכית) ל-Congestion Avoidance (ליניארית).',
+
+    // --- Network ---
+    'IP': 'Internet Protocol — פרוטוקול הרשת בשכבה 3: כתובות וניתוב, ללא אמינות.',
+    'IPv4': 'Internet Protocol version 4 — הגרסה הקלאסית, כתובות של 32 ביט.',
+    'IPv6': 'Internet Protocol version 6 — הגרסה החדשה, כתובות של 128 ביט.',
+    'NAT': 'Network Address Translation — מיפוי כתובות פרטיות לכתובת ציבורית אחת לפי פורטים.',
+    'DHCP': 'Dynamic Host Configuration Protocol — מקצה כתובות IP אוטומטית (תהליך DORA).',
+    'DORA': 'Discover, Offer, Request, ACK — ארבעת שלבי הקצאת כתובת ב-DHCP.',
+    'ICMP': 'Internet Control Message Protocol — הודעות שגיאה ובקרה בשכבת הרשת (ping, TTL exceeded).',
+    'TTL': 'Time To Live — מונה קפיצות בכותרת IP; יורד ב-1 בכל ראוטר, ב-0 החבילה נזרקת.',
+    'CIDR': 'Classless Inter-Domain Routing — רישום כתובת/פריפיקס (למשל ‎/24) במקום מחלקות.',
+    'AS': 'Autonomous System — מערכת אוטונומית: אוסף רשתות תחת ניהול אחד (למשל ספקית).',
+    'OSPF': 'Open Shortest Path First — פרוטוקול ניתוב תוך-AS מבוסס Link State (דייקסטרה).',
+    'BGP': 'Border Gateway Protocol — פרוטוקול הניתוב בין AS-ים, מבוסס Path Vector ומדיניות.',
+    'RIP': 'Routing Information Protocol — פרוטוקול ניתוב מבוסס Distance Vector (בלמן-פורד).',
+    'DV': 'Distance Vector — גישת ניתוב מבוזרת: כל ראוטר משתף שכנים בטבלת המרחקים שלו.',
+    'LS': 'Link State — גישת ניתוב גלובלית: כל ראוטר מכיר את כל הטופולוגיה ומריץ דייקסטרה.',
+
+    // --- Application ---
+    'HTTP': 'Hypertext Transfer Protocol — פרוטוקול הבקשות/תשובות של ה-web, מעל TCP פורט 80.',
+    'HTTPS': 'HTTP Secure — HTTP מעל SSL/TLS, פורט 443, לתקשורת מוצפנת.',
+    'HTML': 'Hypertext Markup Language — שפת הסימון של דפי web.',
+    'DNS': 'Domain Name System — ממיר שמות דומיין לכתובות IP. היררכי, מעל UDP פורט 53.',
+    'TLD': 'Top Level Domain — הרמה העליונה בהיררכיית DNS‏ (com, org, il).',
+    'CNAME': 'Canonical Name — רשומת DNS שממפה שם נרדף לשם הקנוני.',
+    'ICANN': 'Internet Corporation for Assigned Names and Numbers — הגוף שמנהל שמות דומיין וכתובות.',
+    'SMTP': 'Simple Mail Transfer Protocol — פרוטוקול שליחת דואר, מעל TCP פורט 25.',
+    'IMAP': 'Internet Message Access Protocol — פרוטוקול גישה לתיבת דואר בשרת.',
+    'FTP': 'File Transfer Protocol — פרוטוקול העברת קבצים עם חיבור בקרה וחיבור נתונים נפרדים.',
+    'URL': 'Uniform Resource Locator — כתובת של משאב ברשת: פרוטוקול, שרת ונתיב.',
+    'P2P': 'Peer to Peer — ארכיטקטורה בלי שרת מרכזי: הקצוות מדברים ישירות זה עם זה.',
+    'API': 'Application Programming Interface — ממשק תכנותי בין רכיבי תוכנה (למשל Socket API).',
+
+    // --- Link ---
+    'MAC': 'Media Access Control — כתובת חומרה של 48 ביט של כרטיס הרשת; וגם שכבת הגישה לערוץ.',
+    'ARP': 'Address Resolution Protocol — מוצא כתובת MAC עבור כתובת IP ידועה באותה רשת.',
+    'CSMA/CD': 'CSMA with Collision Detection — מאזין לפני שידור ומזהה התנגשות תוך כדי (Ethernet קווי).',
+    'CSMA': 'Carrier Sense Multiple Access — פרוטוקול גישה לערוץ: מאזין לפני ששולח.',
+    'ALOHA': 'פרוטוקול הגישה האקראית הראשון: משדרים בלי להאזין. ניצולת מקס׳ 18% (או 37% ב-Slotted).',
+    'TDMA': 'Time Division Multiple Access — חלוקת הערוץ לפרוסות זמן קבועות בין המשתמשים.',
+    'FDMA': 'Frequency Division Multiple Access — חלוקת הערוץ לתדרים קבועים בין המשתמשים.',
+    'CRC': 'Cyclic Redundancy Check — קוד גילוי שגיאות שמחושב לכל פריים בשכבת הקישור.',
+    'OUI': 'Organizationally Unique Identifier — שלושת הבייטים הראשונים בכתובת MAC, מזהים את היצרן.',
+    'LAN': 'Local Area Network — רשת מקומית (בניין/קמפוס), בדרך כלל Ethernet או WiFi.',
+    'Ethernet': 'טכנולוגיית ה-LAN הקווית הנפוצה: פריימים עם כתובות MAC, ‏CSMA/CD היסטורית.',
+
+    // --- Security ---
+    'RSA': 'Rivest–Shamir–Adleman — אלגוריתם הצפנה אסימטרי (מפתח ציבורי) מבוסס פירוק לגורמים.',
+    'AES': 'Advanced Encryption Standard — אלגוריתם ההצפנה הסימטרי הסטנדרטי כיום.',
+    '3DES': 'Triple DES — הפעלת DES שלוש פעמים ברצף לחיזוק המפתח.',
+    'DES': 'Data Encryption Standard — אלגוריתם הצפנה סימטרי ישן (מפתח 56 ביט, נחשב חלש).',
+    'TLS': 'Transport Layer Security — היורש המודרני של SSL; מצפין תעבורה מעל TCP.',
+    'SSL': 'Secure Sockets Layer — שכבת הצפנה בין האפליקציה ל-TCP‏; הבסיס של HTTPS.',
+    'PK': 'Public Key — המפתח הציבורי: גלוי לכולם, מצפינים איתו הודעות אל הבעלים.',
+    'SK': 'Secret/Private Key — המפתח הפרטי: רק הבעלים מחזיק בו, מפענח וחותם.',
+    'DDoS': 'Distributed Denial of Service — מתקפת מניעת שירות ממקורות רבים במקביל.',
+    'DoS': 'Denial of Service — מתקפה שמציפה שרת בבקשות עד שקורס או לא זמין.',
+
+    // --- General ---
+    'ISP': 'Internet Service Provider — ספקית שירותי אינטרנט.',
+    'OSI': 'Open Systems Interconnection — מודל 7 השכבות של ISO.',
+    'ISO': 'International Organization for Standardization — ארגון התקנים הבינלאומי.',
+    'MTU': 'Maximum Transmission Unit — הגודל המרבי של חבילה בלינק; מעליו נדרשת פרגמנטציה.',
+  };
+
+  const TERMS = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length);
+  const PATTERN = TERMS
+    .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|');
+  // Whole word: no Latin letter/digit before or after (Hebrew around is fine)
+  const RE = new RegExp('(?<![A-Za-z0-9])(' + PATTERN + ')(?![A-Za-z0-9])', 'g');
+
+  const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'CODE', 'PRE', 'TEXTAREA', 'A', 'BUTTON', 'H1']);
+
+  function insideSkipped(el) {
+    for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
+      if (SKIP_TAGS.has(n.tagName)) return true;
+      const c = n.classList;
+      if (c && (c.contains('gloss') || c.contains('katex') ||
+                c.contains('katex-display') || c.contains('sidebar'))) return true;
+    }
+    return false;
+  }
+
+  function run() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const t = node.nodeValue;
+        if (!t || t.indexOf('$') !== -1) return NodeFilter.FILTER_REJECT; // leave raw math alone
+        RE.lastIndex = 0;
+        if (!RE.test(t)) return NodeFilter.FILTER_REJECT;
+        if (insideSkipped(node.parentElement)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    for (const node of nodes) {
+      const text = node.nodeValue;
+      const frag = document.createDocumentFragment();
+      let last = 0, m;
+      RE.lastIndex = 0;
+      while ((m = RE.exec(text)) !== null) {
+        if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        const span = document.createElement('span');
+        span.className = 'gloss';
+        span.setAttribute('data-tip', GLOSSARY[m[1]]);
+        span.textContent = m[1];
+        frag.appendChild(span);
+        last = m.index + m[1].length;
+      }
+      if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+      node.parentNode.replaceChild(frag, node);
+    }
+
+    // Touch devices: tap toggles the tooltip (hover doesn't exist on mobile)
+    document.body.addEventListener('click', (e) => {
+      const g = e.target.closest('.gloss');
+      document.querySelectorAll('.gloss.tap').forEach(x => { if (x !== g) x.classList.remove('tap'); });
+      if (g) g.classList.toggle('tap');
+    });
+  }
+
+  // Registered after the head script's DOMContentLoaded listener,
+  // so this runs AFTER renderMathInElement has replaced $...$ with KaTeX spans.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
+</script>
+
+</body>
+</html>

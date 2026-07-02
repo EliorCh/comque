@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>השהיות ברשת · מבוא לתקשורת מחשבים</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/styles/atom-one-dark.min.css">
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/highlight.min.js"></script>
+
+<script>
+  window.addEventListener('load', () => {
+    if (window.renderMathInElement) {
+      try { renderMathInElement(document.body, { delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}], throwOnError: false, strict: false }); } catch(e){}
+    }
+    if (window.hljs) { try { document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el)); } catch(e){} }
+    document.body.classList.add('ready');
+    // Exercise reveal
+    document.querySelectorAll('.reveal-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.exercise-card').classList.toggle('open');
+        btn.textContent = btn.closest('.exercise-card').classList.contains('open') ? 'הסתר פתרון' : 'הראה פתרון';
+      });
+    });
+  });
+</script>
+
+<style>
+  :root {
+    --bg: #fbf9f3; --bg-paper: #fffefa; --ink: #1c1917; --ink-soft: #44403c; --ink-mute: #78716c;
+    --rule: #e7e5e0; --rule-soft: #f1efe9;
+    --indigo-9: #312e81; --indigo-7: #4f46e5; --indigo-3: #c7d2fe; --indigo-1: #eef2ff;
+    --c-theory-h: #1d4ed8; --c-theory-bg: #eff6ff; --c-theory-edge: #bfdbfe;
+    --c-formula-h: #b45309; --c-formula-bg: #fef9e7; --c-formula-edge: #fcd34d;
+    --c-example-h: #047857; --c-example-bg: #ecfdf5; --c-example-edge: #a7f3d0;
+    --c-warn-h: #be123c; --c-warn-bg: #fff1f2; --c-warn-edge: #fecdd3;
+    --c-exercise-h: #6d28d9; --c-exercise-bg: #f5f3ff; --c-exercise-edge: #ddd6fe;
+    --c-summary-h: #334155; --c-summary-bg: #f1f5f9; --c-summary-edge: #cbd5e1;
+    --code-bg: #0f172a; --code-bg-2: #1e293b; --code-ink: #e2e8f0;
+    --shadow-sm: 0 1px 2px rgba(28,25,23,.04), 0 1px 3px rgba(28,25,23,.06);
+    --shadow: 0 4px 12px rgba(28,25,23,.05), 0 1px 3px rgba(28,25,23,.04);
+    --serif: 'Frank Ruhl Libre', Georgia, serif;
+    --sans: 'Assistant', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.75; font-size: 17px; -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(circle at 20% 0%, rgba(99,102,241,.035), transparent 40%), radial-gradient(circle at 80% 100%, rgba(245,158,11,.035), transparent 40%);
+    background-attachment: fixed; opacity: 0; transition: opacity .2s ease; }
+  body.ready { opacity: 1; }
+  .app { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; max-width: 1480px; margin: 0 auto; }
+  .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%); color: #e0e7ff; padding: 28px 22px; border-left: 1px solid rgba(255,255,255,.06); }
+  .sidebar::-webkit-scrollbar { width: 6px; } .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 3px; }
+  .brand { font-family: var(--serif); font-size: 19px; font-weight: 700; color: #fff; margin-bottom: 6px; letter-spacing: -.01em; line-height: 1.25; }
+  .brand a { color: #fff; text-decoration: none; } .brand a:hover { color: #fbbf24; }
+  .brand-sub { font-size: 12.5px; color: #c7d2fe; margin-bottom: 22px; font-weight: 500; }
+  .brand-meta { font-size: 10.5px; color: #a5b4fc; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .nav-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .12em; color: #818cf8; font-weight: 700; margin: 18px 0 8px; padding-right: 8px; }
+  .nav-label.first { margin-top: 0; }
+  .nav-list { list-style: none; } .nav-list li { margin-bottom: 1px; }
+  .nav-list a { display: flex; align-items: center; gap: 9px; padding: 7px 10px; color: #c7d2fe; text-decoration: none; border-radius: 7px; font-size: 13.5px; font-weight: 500; transition: all .15s ease; line-height: 1.3; }
+  .nav-list a:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .nav-list a.active { background: rgba(255,255,255,.12); color: #fff; box-shadow: inset 3px 0 0 #fbbf24; }
+  .nav-list a.pending { opacity: .4; cursor: not-allowed; }
+  .nav-list a.pending:hover { background: transparent; color: #c7d2fe; }
+  .nav-num { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 20px; background: rgba(255,255,255,.08); border-radius: 5px; font-size: 10.5px; font-weight: 700; font-family: var(--mono); padding: 0 4px; }
+  .nav-list a.active .nav-num { background: #fbbf24; color: #1e1b4b; }
+  main { padding: 56px 64px 120px; max-width: 980px; }
+  .page-eyebrow { display: inline-block; font-size: 12px; font-weight: 700; color: var(--indigo-7); letter-spacing: .15em; text-transform: uppercase; background: var(--indigo-1); padding: 6px 12px; border-radius: 99px; margin-bottom: 16px; }
+  h1.page-title { font-family: var(--serif); font-size: 46px; font-weight: 700; line-height: 1.15; letter-spacing: -.02em; color: var(--ink); margin-bottom: 14px; }
+  .page-subtitle { font-size: 19px; color: var(--ink-soft); margin-bottom: 36px; font-weight: 400; line-height: 1.55; }
+  h2 { font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: -.015em; margin: 48px 0 18px; color: var(--ink); position: relative; padding-right: 20px; }
+  h2::before { content: ''; position: absolute; right: 0; top: 12px; bottom: 12px; width: 4px; background: var(--indigo-7); border-radius: 2px; }
+  h3 { font-family: var(--sans); font-size: 21px; font-weight: 700; margin: 30px 0 12px; color: var(--ink); letter-spacing: -.005em; }
+  h4 { font-size: 17px; font-weight: 700; margin: 18px 0 8px; color: var(--ink-soft); }
+  p { margin-bottom: 14px; color: var(--ink-soft); } p strong { color: var(--ink); font-weight: 700; }
+  ul, ol { margin: 12px 24px 18px; color: var(--ink-soft); } li { margin-bottom: 6px; }
+  .term { font-family: var(--mono); direction: ltr; display: inline-block; font-size: .88em; background: #f5f5f4; padding: 1px 8px; border-radius: 5px; color: #be185d; border: 1px solid #e7e5e4; vertical-align: baseline; unicode-bidi: isolate; }
+  .term.blue { color: var(--c-theory-h); background: var(--c-theory-bg); border-color: var(--c-theory-edge); }
+  .term.green { color: var(--c-example-h); background: var(--c-example-bg); border-color: var(--c-example-edge); }
+  .term.amber { color: var(--c-formula-h); background: var(--c-formula-bg); border-color: var(--c-formula-edge); }
+  .term.purple { color: var(--c-exercise-h); background: var(--c-exercise-bg); border-color: var(--c-exercise-edge); }
+  .term.red { color: var(--c-warn-h); background: var(--c-warn-bg); border-color: var(--c-warn-edge); }
+  .term.cyan { color: #0891b2; background: #ecfeff; border-color: #a5f3fc; }
+  .katex-display { margin: 18px 0 !important; direction: ltr !important; text-align: center !important; unicode-bidi: isolate; } .katex { direction: ltr !important; unicode-bidi: isolate; }
+  .box { border-radius: 14px; margin: 22px 0; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--rule); background: var(--bg-paper); }
+  .box-head { display: flex; align-items: center; gap: 12px; padding: 13px 22px; font-weight: 700; font-size: 15px; border-bottom: 1px solid var(--rule-soft); }
+  .box-head .icon { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; font-size: 16px; }
+  .box-body { padding: 20px 26px; } .box-body > *:last-child { margin-bottom: 0; }
+  .box.theory { border-color: var(--c-theory-edge); } .box.theory .box-head { background: var(--c-theory-bg); color: var(--c-theory-h); } .box.theory .box-head .icon { background: var(--c-theory-h); color: #fff; }
+  .box.formula { border-color: var(--c-formula-edge); background: var(--c-formula-bg); } .box.formula .box-head { background: transparent; color: var(--c-formula-h); border-bottom-color: rgba(180,83,9,.18); } .box.formula .box-head .icon { background: var(--c-formula-h); color: #fff; } .box.formula .box-body { background: var(--c-formula-bg); } .box.formula p { color: #78350f; }
+  .box.example { border-color: var(--c-example-edge); } .box.example .box-head { background: var(--c-example-bg); color: var(--c-example-h); } .box.example .box-head .icon { background: var(--c-example-h); color: #fff; }
+  .box.warn { border-color: var(--c-warn-edge); } .box.warn .box-head { background: var(--c-warn-bg); color: var(--c-warn-h); } .box.warn .box-head .icon { background: var(--c-warn-h); color: #fff; }
+  .box.exercise { border-color: var(--c-exercise-edge); } .box.exercise .box-head { background: var(--c-exercise-bg); color: var(--c-exercise-h); } .box.exercise .box-head .icon { background: var(--c-exercise-h); color: #fff; }
+  .box.summary { border-color: var(--c-summary-edge); } .box.summary .box-head { background: var(--c-summary-bg); color: var(--c-summary-h); } .box.summary .box-head .icon { background: var(--c-summary-h); color: #fff; }
+  pre { background: var(--code-bg) !important; border-radius: 0 0 12px 12px; padding: 18px 22px !important; margin: 0 0 16px 0; overflow-x: auto; direction: ltr; font-size: 14px; line-height: 1.7; box-shadow: var(--shadow); border: 1px solid var(--code-bg-2); border-top: none; }
+  pre code { font-family: var(--mono) !important; background: transparent !important; padding: 0 !important; border: none !important; color: var(--code-ink) !important; }
+  .code-label { display: flex; align-items: center; gap: 8px; background: var(--code-bg-2); color: #94a3b8; font-family: var(--mono); font-size: 12px; padding: 10px 16px; border-radius: 12px 12px 0 0; direction: ltr; border: 1px solid var(--code-bg-2); border-bottom: 1px solid #334155; margin-top: 18px; }
+  .code-label .dot { width: 8px; height: 8px; border-radius: 50%; background: #475569; }
+  .code-label .name { margin-right: auto; opacity: .9; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-sm); font-size: 15px; }
+  th, td { padding: 11px 14px; text-align: right; border-bottom: 1px solid var(--rule-soft); border-left: 1px solid var(--rule-soft); }
+  th { background: var(--c-summary-bg); font-weight: 700; color: var(--c-summary-h); }
+  tr:last-child td { border-bottom: none; }
+  td.num, th.num { font-family: var(--mono); direction: ltr; text-align: center; font-size: 14px; }
+  td.highlight { background: var(--c-formula-bg); font-weight: 700; color: var(--c-formula-h); }
+  .exercise-card { background: #fff; border-radius: 10px; margin: 14px 0; border: 1px solid var(--c-exercise-edge); overflow: hidden; }
+  .exercise-tag { display: inline-block; font-size: 11px; font-weight: 700; background: var(--c-exercise-h); color: #fff; padding: 3px 10px; border-radius: 99px; margin-bottom: 10px; font-family: var(--mono); letter-spacing: .05em; direction: ltr; }
+  .exercise-q { padding: 20px 24px; background: #fafaf9; border-bottom: 1px solid var(--rule-soft); }
+  .exercise-q p:last-child { margin-bottom: 0; }
+  .reveal-btn { display: block; width: 100%; background: var(--c-exercise-bg); border: none; border-top: 1px solid var(--c-exercise-edge); padding: 13px; font-family: var(--sans); font-size: 14px; font-weight: 700; color: var(--c-exercise-h); cursor: pointer; transition: background .15s ease; }
+  .reveal-btn:hover { background: #ede9fe; }
+  .solution { padding: 22px 26px; background: var(--c-example-bg); border-top: 1px solid var(--c-example-edge); display: none; }
+  .exercise-card.open .solution { display: block; }
+  .solution .step { background: #fff; border-radius: 8px; padding: 14px 18px; margin: 12px 0; border-right: 3px solid var(--c-example-h); }
+  .solution .step-label { font-size: 11px; font-weight: 700; color: var(--c-example-h); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; font-family: var(--mono); }
+  .solution .final-answer { background: #fff; border: 2px solid var(--c-example-h); border-radius: 10px; padding: 14px 20px; margin-top: 16px; font-weight: 600; }
+  .solution .final-answer::before { content: '✓ '; color: var(--c-example-h); font-weight: 900; }
+  .lead { font-size: 19px; color: var(--ink-soft); border-right: 3px solid var(--indigo-7); padding-right: 20px; margin: 24px 0 32px; font-weight: 400; line-height: 1.6; }
+  .keypoint { background: linear-gradient(90deg, var(--c-formula-bg) 0%, transparent 100%); padding: 14px 18px; border-radius: 8px; margin: 16px 0; border-right: 3px solid var(--c-formula-h); }
+  .keypoint::before { content: '💡 '; font-size: 18px; margin-left: 4px; }
+  .mc-list { list-style: none; margin: 12px 0; padding: 0; }
+  .mc-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: #fff; border: 1px solid var(--rule); border-radius: 8px; margin-bottom: 8px; transition: all .15s ease; }
+  .mc-list li .mc-marker { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--rule); flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--ink-mute); background: #fff; }
+  .mc-list li.correct { background: var(--c-example-bg); border-color: var(--c-example-edge); }
+  .mc-list li.correct .mc-marker { background: var(--c-example-h); color: #fff; border-color: var(--c-example-h); }
+  .mc-list li.correct .mc-marker::after { content: '✓'; }
+  .mc-list li.wrong { background: var(--c-warn-bg); border-color: var(--c-warn-edge); }
+  .mc-list li.wrong .mc-marker { background: var(--c-warn-h); color: #fff; border-color: var(--c-warn-h); }
+  .mc-list li.wrong .mc-marker::after { content: '✗'; }
+  .mc-list li .mc-text { flex: 1; line-height: 1.55; color: var(--ink-soft); }
+  .mc-list li .mc-text .why { display: block; margin-top: 6px; font-size: 13.5px; color: var(--ink-mute); font-style: italic; }
+  .figure { background: #fff; border: 1px solid var(--rule); border-radius: 12px; padding: 18px; margin: 18px 0; text-align: center; box-shadow: var(--shadow-sm); }
+  .figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  .figure .cap { font-size: 13px; color: var(--ink-mute); margin-top: 12px; font-style: italic; }
+
+  /* Enrichment (העשרה) - content not in lectures, collapsible */
+  details.enrichment { background: #faf8f3; border: 1px dashed #c7c2b5; border-radius: 10px; margin: 18px 0; padding: 0; overflow: hidden; }
+  details.enrichment > summary { cursor: pointer; padding: 12px 18px; background: linear-gradient(90deg, #f5f2ea 0%, #faf8f3 100%); font-family: var(--sans); font-size: 14px; font-weight: 700; color: #6b6354; user-select: none; list-style: none; display: flex; align-items: center; gap: 10px; }
+  details.enrichment > summary::-webkit-details-marker { display: none; }
+  details.enrichment > summary::before { content: '📚'; font-size: 16px; }
+  details.enrichment > summary::after { content: 'לחץ להרחבה ▾'; margin-right: auto; font-size: 11px; font-weight: 500; color: #9a9080; letter-spacing: .04em; }
+  details.enrichment[open] > summary::after { content: 'הסתר ▴'; }
+  details.enrichment > summary:hover { background: #f0ece2; }
+  details.enrichment .enrichment-body { padding: 14px 22px 18px; border-top: 1px dashed #d8d3c2; }
+  details.enrichment .enrichment-body > *:first-child { margin-top: 0; }
+  details.enrichment .enrichment-note { font-size: 12px; color: #9a9080; font-style: italic; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dotted #d8d3c2; }
+  @media (max-width: 900px) { .app { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } main { padding: 32px 24px 80px; } h1.page-title { font-size: 34px; } h2 { font-size: 25px; } }
+
+/* ===== glossary-tooltips-v1 ===== */
+.gloss {
+  border-bottom: 1px dashed var(--indigo-3, #c7d2fe);
+  cursor: help;
+  position: relative;
+}
+.gloss::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 50%;
+  transform: translateX(50%);
+  background: var(--ink, #1c1917);
+  color: var(--bg, #fbf9f3);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.55;
+  white-space: normal;
+  width: max-content;
+  max-width: 320px;
+  z-index: 100;
+  direction: rtl;
+  text-align: right;
+  box-shadow: 0 4px 16px rgba(60,55,50,0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  font-family: 'Assistant', sans-serif;
+}
+.gloss::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 3px);
+  right: 50%;
+  transform: translateX(50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink, #1c1917);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.gloss:hover::after, .gloss:hover::before,
+.gloss:focus::after, .gloss:focus::before,
+.gloss.tap::after,  .gloss.tap::before {
+  opacity: 1;
+}
+
+/* ===== pager-v1 ===== */
+.pager { display:flex; justify-content:space-between; gap:12px; margin-top:40px; padding-top:22px; border-top:1px solid var(--rule, #e7e5e0); }
+.pager a { display:flex; flex-direction:column; gap:3px; text-decoration:none; padding:12px 16px; border:1px solid var(--rule, #e7e5e0); border-radius:10px; background:var(--bg-paper, #fffefa); max-width:48%; transition:border-color .15s, box-shadow .15s; }
+.pager a:hover { border-color: var(--indigo-3, #c7d2fe); box-shadow:0 2px 10px rgba(60,55,50,.08); }
+.pager a.next { margin-inline-start:auto; text-align:left; }
+.pager .dir { font-size:12px; color:var(--ink-mute, #78716c); font-weight:600; }
+.pager .name { font-size:14.5px; color:var(--indigo-7, #4f46e5); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="brand"><a href="index.html">מבוא לתקשורת<br>מחשבים</a></div>
+  <div class="brand-sub">ד״ר מור פרי · ד״ר הדר בינסקי</div>
+  <div class="brand-meta">MTA · הכנה למבחן</div>
+
+  <div class="nav-label first">📘 מבוא</div>
+  <ul class="nav-list">
+    <li><a href="00-intro.html" data-page="00"><span class="nav-num">0.1</span>רשת האינטרנט והשכבות</a></li>
+    <li><a href="01-delays.html" class="active" data-page="01"><span class="nav-num">0.2</span>השהיות ברשת</a></li>
+  </ul>
+
+  <div class="nav-label">1️⃣ שכבת האפליקציה</div>
+  <ul class="nav-list">
+    <li><a href="02-app-sockets.html" data-page="02"><span class="nav-num">1.1</span>סוקטים, לקוח-שרת, P2P</a></li>
+    <li><a href="03-app-http.html" data-page="03"><span class="nav-num">1.2</span>HTTP</a></li>
+    <li><a href="04-app-proxy-cache.html" data-page="04"><span class="nav-num">1.3</span>Proxy, Cache, Cond. GET</a></li>
+    <li><a href="05-app-cookies.html" data-page="05"><span class="nav-num">1.4</span>Cookies</a></li>
+    <li><a href="06-app-dns.html" data-page="06"><span class="nav-num">1.5</span>DNS</a></li>
+    <li><a href="sum-app.html" data-page="sum-app"><span class="nav-num">📌</span>סיכום השכבה</a></li>
+  </ul>
+
+  <div class="nav-label">2️⃣ שכבת התעבורה</div>
+  <ul class="nav-list">
+    <li><a href="07-trans-udp.html" data-page="07"><span class="nav-num">2.1</span>UDP ומולטיפלקסינג</a></li>
+    <li><a href="08-trans-rdt.html" data-page="08"><span class="nav-num">2.2</span>העברה אמינה (RDT)</a></li>
+    <li><a href="09-trans-tcp.html" data-page="09"><span class="nav-num">2.3</span>TCP — מבנה</a></li>
+    <li><a href="10-trans-flow.html" data-page="10"><span class="nav-num">2.4</span>בקרת זרימה</a></li>
+    <li><a href="11-trans-handshake.html" data-page="11"><span class="nav-num">2.5</span>הקמת וסגירת קשר</a></li>
+    <li><a href="12-trans-congestion.html" data-page="12"><span class="nav-num">2.6</span>בקרת גודש</a></li>
+    <li><a href="sum-trans.html" data-page="sum-trans"><span class="nav-num">📌</span>סיכום השכבה</a></li>
+  </ul>
+
+  <div class="nav-label">3️⃣ שכבת הרשת</div>
+  <ul class="nav-list">
+    <li><a href="13-net-intro.html" data-page="13"><span class="nav-num">3.1</span>IP דאטהגרם</a></li>
+    <li><a href="14-net-fragmentation.html" data-page="14"><span class="nav-num">3.2</span>פרגמנטציה</a></li>
+    <li><a href="15-net-ip-addressing.html" data-page="15"><span class="nav-num">3.3</span>כתובות IP</a></li>
+    <li><a href="16-net-dhcp.html" data-page="16"><span class="nav-num">3.4</span>DHCP</a></li>
+    <li><a href="17-net-nat-ipv6.html" data-page="17"><span class="nav-num">3.5</span>NAT, IPv6, ICMP</a></li>
+    <li><a href="18-net-routing.html" data-page="18"><span class="nav-num">3.6</span>ראוטינג — DV, LS</a></li>
+    <li><a href="19-net-ospf-bgp.html" data-page="19"><span class="nav-num">3.7</span>OSPF, BGP, AS</a></li>
+    <li><a href="sum-net.html" data-page="sum-net"><span class="nav-num">📌</span>סיכום השכבה</a></li>
+  </ul>
+
+  <div class="nav-label">4️⃣ שכבת הקישור</div>
+  <ul class="nav-list">
+    <li><a href="20-link-framing.html" data-page="20"><span class="nav-num">4.1</span>Framing ושירותים</a></li>
+    <li><a href="21-link-aloha.html" data-page="21"><span class="nav-num">4.2</span>ALOHA</a></li>
+    <li><a href="22-link-csma.html" data-page="22"><span class="nav-num">4.3</span>CSMA, Ethernet</a></li>
+    <li><a href="23-link-mac-arp.html" data-page="23"><span class="nav-num">4.4</span>MAC, ARP</a></li>
+    <li><a href="24-link-switches.html" data-page="24"><span class="nav-num">4.5</span>סוויצ'ים</a></li>
+    <li><a href="25-link-day-in-life.html" data-page="25"><span class="nav-num">4.6</span>יום בחיי הודעה</a></li>
+    <li><a href="sum-link.html" data-page="sum-link"><span class="nav-num">📌</span>סיכום השכבה</a></li>
+  </ul>
+
+  <div class="nav-label">5️⃣ השכבה הפיזית</div>
+  <ul class="nav-list">
+    <li><a href="26-phys-signals.html" data-page="26"><span class="nav-num">5.1</span>אותות וביטים</a></li>
+  </ul>
+
+  <div class="nav-label">🔐 אבטחה וקריפטוגרפיה</div>
+  <ul class="nav-list">
+    <li><a href="27-sec-threats.html" data-page="27"><span class="nav-num">6.1</span>איומים</a></li>
+    <li><a href="28-sec-crypto.html" data-page="28"><span class="nav-num">6.2</span>הצפנה סימטרית/אסימטרית</a></li>
+    <li><a href="29-sec-signatures.html" data-page="29"><span class="nav-num">6.3</span>חתימה דיגיטלית</a></li>
+    <li><a href="30-sec-ssl.html" data-page="30"><span class="nav-num">6.4</span>SSL/TLS</a></li>
+    <li><a href="sum-sec.html" data-page="sum-sec"><span class="nav-num">📌</span>סיכום השכבה</a></li>
+  </ul>
+
+  <div class="nav-label">📋 חזרה</div>
+  <ul class="nav-list">
+    <li><a href="31-cheatsheet.html" data-page="31"><span class="nav-num">📋</span>דף נוסחאות</a></li>
+    <li><a href="https://eliorch.github.io/comque" target="_blank" rel="noopener" data-page="comque"><span class="nav-num">🎯</span>אתר השאלות</a></li>
+  </ul>
+
+</aside>
+
+<main>
+  <span class="page-eyebrow">פרק 0.2 · מבוא</span>
+  <h1 class="page-title">השהיות ברשת</h1>
+  <p class="page-subtitle">4 סוגי דיליי — איפה לוקח זמן, ומה הנוסחה לכל אחד.</p>
+
+  <div class="figure">
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="4 סוגי השהיות בראוטר בודד">
+      <defs>
+        <marker id="arrPckt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+        </marker>
+      </defs>
+      <!-- The router box -->
+      <g font-family="Assistant, sans-serif" font-size="13">
+        <rect x="200" y="60" width="320" height="100" rx="12" fill="#fbf9f3" stroke="#475569" stroke-width="1.5"/>
+        <text x="360" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">ראוטר</text>
+
+        <!-- Stage 1: processing -->
+        <rect x="218" y="92" width="60" height="50" rx="6" fill="#eef2ff" stroke="#4f46e5"/>
+        <text x="248" y="115" text-anchor="middle" font-size="11" fill="#4f46e5" font-weight="700">עיבוד</text>
+        <text x="248" y="130" text-anchor="middle" font-size="10" fill="#4f46e5">d_proc</text>
+
+        <!-- Stage 2: queue -->
+        <rect x="287" y="92" width="60" height="50" rx="6" fill="#fef9e7" stroke="#b45309"/>
+        <text x="317" y="115" text-anchor="middle" font-size="11" fill="#b45309" font-weight="700">תור</text>
+        <text x="317" y="130" text-anchor="middle" font-size="10" fill="#b45309">d_queue</text>
+
+        <!-- Stage 3: transmission -->
+        <rect x="356" y="92" width="80" height="50" rx="6" fill="#ecfdf5" stroke="#047857"/>
+        <text x="396" y="115" text-anchor="middle" font-size="11" fill="#047857" font-weight="700">טרנסמישן</text>
+        <text x="396" y="130" text-anchor="middle" font-size="10" fill="#047857">d_trans</text>
+
+        <!-- Stage 4: propagation -->
+        <rect x="445" y="92" width="65" height="50" rx="6" fill="#fff1f2" stroke="#be123c"/>
+        <text x="478" y="115" text-anchor="middle" font-size="11" fill="#be123c" font-weight="700">פרופגיישן</text>
+        <text x="478" y="130" text-anchor="middle" font-size="10" fill="#be123c">d_prop</text>
+
+        <!-- Packet incoming -->
+        <line x1="100" y1="110" x2="200" y2="110" stroke="#475569" stroke-width="2" marker-end="url(#arrPckt)"/>
+        <rect x="120" y="102" width="20" height="16" rx="2" fill="#fbbf24"/>
+        <text x="150" y="98" font-size="10" fill="#78716c">פאקטה</text>
+
+        <!-- Packet outgoing -->
+        <line x1="520" y1="110" x2="640" y2="110" stroke="#475569" stroke-width="2" marker-end="url(#arrPckt)"/>
+        <rect x="580" y="102" width="20" height="16" rx="2" fill="#fbbf24"/>
+
+        <!-- Labels -->
+        <text x="100" y="40" text-anchor="middle" font-size="12" fill="#1c1917" font-weight="700">A (שולח)</text>
+        <text x="620" y="40" text-anchor="middle" font-size="12" fill="#1c1917" font-weight="700">הראוטר הבא / B</text>
+
+        <text x="360" y="190" text-anchor="middle" font-size="13" fill="#475569"><tspan font-family="JetBrains Mono, monospace">d_nodal = d_proc + d_queue + d_trans + d_prop</tspan></text>
+        <text x="360" y="207" text-anchor="middle" font-size="11" fill="#78716c">סך כל ההשהיה בקודקוד אחד = Nodal Delay</text>
+      </g>
+    </svg>
+    <div class="cap">4 סוגי דיליי שקורים בכל ראוטר. בלינק ארוך, ה-Propagation דומיננטי. בלינק קצר ועמוס — התור.</div>
+  </div>
+
+  <p class="lead">
+    בכל מקטע ראוטר ← ראוטר יש <strong>4 סוגי השהיה</strong>. רק שניים מהם תלויים בנו (העיבוד והטרנסמישן). השניים האחרים תלויים בעומס ובאורך הכבל. למבחן — צריך לדעת לחשב את כל הארבעה ולסכם אותם.
+  </p>
+
+  <h2>4 סוגי דיליי</h2>
+
+  <div class="box theory">
+    <div class="box-head"><span class="icon">📘</span>1. השהיית עיבוד · Processing Delay</div>
+    <div class="box-body">
+      <p>הזמן שלוקח לראוטר <strong>לבדוק שגיאות ולהחליט באיזו רגל יוצאים</strong>.</p>
+      <ol>
+        <li>בדיקת checksum על הביטים שהגיעו.</li>
+        <li>חיפוש כתובת היעד בטבלת הפורוורדינג.</li>
+        <li>החלטה על רגל היציאה.</li>
+      </ol>
+      <p>בדרך כלל בודד — מיקרו שניות בודדות. בתרגיל ייתנו לך את הערך כקבוע.</p>
+      <p><span class="term">סימון: <strong>d_proc</strong> או Processing Delay</span></p>
+    </div>
+  </div>
+
+  <div class="box theory">
+    <div class="box-head"><span class="icon">📘</span>2. השהיית תור · Queueing Delay</div>
+    <div class="box-body">
+      <p>כשהפאקטה מסיימת עיבוד, היא <strong>מחכה ברגל היציאה</strong> עד שיגיע תורה לצאת. אם הרשת עמוסה, היא תחכה הרבה. אם פנויה, בכלל לא.</p>
+      <p><strong>תלוי בעומס</strong>, ולכן <strong>משתנה בזמן ובלתי צפוי</strong>. בתרגיל פשוט בדרך כלל יניחו שהוא זניח.</p>
+      <p>אם הבאפר של הרגל מלא — הפאקטה <strong>אובדת</strong> (Packet Loss).</p>
+      <p><span class="term">סימון: <strong>d_queue</strong></span></p>
+    </div>
+  </div>
+
+  <div class="box formula">
+    <div class="box-head"><span class="icon">📐</span>3. השהיית טרנסמישן · Transmission Delay</div>
+    <div class="box-body">
+      <p>הזמן שלוקח <strong>להוציא את כל הביטים של הפאקטה</strong> לכבל. תלוי בגודל הפאקטה וברוחב הפס.</p>
+      $$d_{trans} = \frac{L}{R}$$
+      <p>כאשר:</p>
+      <ul>
+        <li><strong>L</strong> — אורך הפאקטה ב<strong>ביטים</strong> (אם נתון בבתים — להכפיל ב-8)</li>
+        <li><strong>R</strong> — רוחב הפס של הלינק ב<strong>ביטים לשנייה (bps)</strong></li>
+      </ul>
+      <p><strong>זכור:</strong> טרנסמישן הוא הזמן <em>"להיפטר"</em> מהפאקטה — לא הזמן שלוקח לה <em>"להגיע"</em>. אלה שני דברים שונים לחלוטין!</p>
+    </div>
+  </div>
+
+  <div class="box formula">
+    <div class="box-head"><span class="icon">📐</span>4. השהיית פרופגיישן · Propagation Delay</div>
+    <div class="box-body">
+      <p>הזמן שלוקח <strong>לביט בודד לעבור פיזית בכבל</strong> מקצה לקצה. תלוי במרחק ובמהירות ההפצה.</p>
+      $$d_{prop} = \frac{d}{s}$$
+      <p>כאשר:</p>
+      <ul>
+        <li><strong>d</strong> — אורך הלינק ב<strong>מטרים</strong></li>
+        <li><strong>s</strong> — מהירות ההפצה (לרוב משתמשים במהירות האור: $s = 2 \cdot 10^8 \, \frac{m}{s}$ בכבל; במקרים מסוימים פחות בסיב אופטי)</li>
+      </ul>
+      <p>בלינק קצר — חלקיק שנייה. בלינק טרנס-אטלנטי או לוויין — עשרות מילישניות.</p>
+    </div>
+  </div>
+
+  <div class="box warn">
+    <div class="box-head"><span class="icon">⚠</span>ההבדל הקריטי: טרנסמישן vs פרופגיישן</div>
+    <div class="box-body">
+      <p>זה הפח הכי שכיח. שניהם נמדדים בשניות, ושניהם נראים כאילו מתארים "כמה זמן ההודעה זזה". אבל:</p>
+      <table>
+        <thead>
+          <tr><th>שאלה</th><th>טרנסמישן</th><th>פרופגיישן</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>מה הוא מודד?</td><td>זמן להוציא ביטים לכבל</td><td>זמן לביט לעבור פיזית</td></tr>
+          <tr><td>תלוי במרחק?</td><td>לא</td><td>כן</td></tr>
+          <tr><td>תלוי בגודל הפאקטה?</td><td>כן</td><td>לא</td></tr>
+          <tr><td>תלוי ברוחב פס?</td><td>כן</td><td>לא</td></tr>
+          <tr><td>הנוסחה</td><td><span class="term">L/R</span></td><td><span class="term">d/s</span></td></tr>
+        </tbody>
+      </table>
+      <p><strong>אנלוגיה:</strong> דמיין שיירת משאיות שיוצאות ממפעל. <strong>טרנסמישן</strong> = הזמן עד שכל המשאיות יצאו מהמפעל. <strong>פרופגיישן</strong> = הזמן שלוקח למשאית בודדת לנסוע מהמפעל ליעד.</p>
+    </div>
+  </div>
+
+  <h2>סך כל ההשהיה — Nodal Delay</h2>
+
+  <div class="box formula">
+    <div class="box-head"><span class="icon">📐</span>השהיה בקודקוד אחד</div>
+    <div class="box-body">
+      $$d_{nodal} = d_{proc} + d_{queue} + d_{trans} + d_{prop}$$
+      <p>זה כל מה שקורה בראוטר אחד. למעבר דרך ‎N ראוטרים — סוכמים את ה-nodal delay של כל אחד.</p>
+    </div>
+  </div>
+
+  <div class="box warn">
+    <div class="box-head"><span class="icon">⚠</span>פח מספירת טרנסמישנים</div>
+    <div class="box-body">
+      <p>במסלול עם ראוטרים, יש לספור <strong>כמה פעמים מתבצע טרנסמישן</strong>. הכלל:</p>
+      <p><strong>כל קודקוד שמשדר את הפאקטה לכבל = +1 טרנסמישן.</strong></p>
+      <p>אם המסלול הוא <span class="term">S → R1 → R2 → R3 → T</span>, אז:</p>
+      <ul>
+        <li>S משדר ← <span class="term">+1</span></li>
+        <li>R1 משדר ← <span class="term">+1</span></li>
+        <li>R2 משדר ← <span class="term">+1</span></li>
+        <li>R3 משדר ← <span class="term">+1</span></li>
+        <li>T <strong>רק מקבל</strong>, לא משדר ← <span class="term">+0</span></li>
+      </ul>
+      <p>סה״כ <strong>4 טרנסמישנים</strong> (לא 5!). אותו עיקרון לפרופגיישן — בודדים את הקטעים בין הצמתים.</p>
+    </div>
+  </div>
+
+  <h2>חישובי Throughput</h2>
+
+  <div class="box theory">
+    <div class="box-head"><span class="icon">📘</span>Throughput — קצב שליחת ביטים בפועל</div>
+    <div class="box-body">
+      <p><strong>Throughput</strong> — הקצב שבו ביטים מגיעים מהשולח למקבל בפועל. נמדד ב-bps.</p>
+      <p><strong>כלל הזהב:</strong> ה-Throughput של ערוץ שלם נקבע על-ידי <strong>הלינק הצר ביותר</strong> (Bottleneck).</p>
+      $$\text{Throughput} = \min(R_1, R_2, ..., R_n)$$
+      <p>גם אם יש לי לפטופ עם 1 Gbps Wi-Fi, אם ה-DSL של הספק רק 50 Mbps — אני אקבל 50.</p>
+    </div>
+  </div>
+
+  <h2>תרגילים</h2>
+
+  <div class="exercise-card">
+    <div class="exercise-q">
+      <span class="exercise-tag">תרגיל בית 1 · שאלה 3 · Link Delays</span>
+      <p>חבילה עוברת בין שני מחשבים המחוברים בלינק ישיר עם הנתונים:</p>
+      <ul>
+        <li>זמן עיבוד פרוטוקול = <span class="term">120 µsec</span></li>
+        <li>אורך פאקטה = <span class="term">1500 Bytes</span></li>
+        <li>רוחב פס (Channel Capacity) = <span class="term">120 Mbps</span></li>
+        <li>גורם פרופגיישן = <span class="term">17 µsec/km</span></li>
+        <li>אורך הלינק = <span class="term">5000 km</span></li>
+      </ul>
+      <p>הזניחו עיכובי תור.</p>
+      <ol>
+        <li>כמה זמן לוקח לפרמט (לעבד) את הדאטה?</li>
+        <li>כמה זמן לוקח לביט בודד לעבור מ-A ל-B?</li>
+        <li>כמה זמן לוקח ל-A להעביר את כל הפאקטה ללינק?</li>
+        <li>מה סך כל ההשהיה?</li>
+      </ol>
+    </div>
+    <button class="reveal-btn">הראה פתרון</button>
+    <div class="solution">
+      <div class="step">
+        <div class="step-label">סעיף 1 · זמן עיבוד</div>
+        <p>הוא נתון! לא צריך לחשב.</p>
+        <p>$$d_{proc} = 120 \, \mu\text{sec}$$</p>
+      </div>
+      <div class="step">
+        <div class="step-label">סעיף 2 · זמן ביט בודד מ-A ל-B (פרופגיישן)</div>
+        <p>זה פרופגיישן בלבד. נתון הגורם: 17 µsec לקילומטר. אורך הלינק: 5000 km.</p>
+        $$d_{prop} = 5000 \, \text{km} \times 17 \, \frac{\mu\text{sec}}{\text{km}} = 85{,}000 \, \mu\text{sec} = 85 \, \text{ms}$$
+        <p>זה זמן מאוד ארוך — בגלל הלינק הענק (5000 ק״מ).</p>
+      </div>
+      <div class="step">
+        <div class="step-label">סעיף 3 · זמן טרנסמישן של פאקטה שלמה</div>
+        <p>הנוסחה: $d_{trans} = L/R$. צריך להמיר יחידות:</p>
+        <ul>
+          <li>$L = 1500 \, \text{Bytes} = 1500 \times 8 = 12{,}000 \, \text{bits}$</li>
+          <li>$R = 120 \, \text{Mbps} = 120 \times 10^6 \, \text{bps}$</li>
+        </ul>
+        $$d_{trans} = \frac{12{,}000}{120 \times 10^6} = 10^{-4} \, \text{sec} = 100 \, \mu\text{sec}$$
+      </div>
+      <div class="step">
+        <div class="step-label">סעיף 4 · סך כל ההשהיה</div>
+        <p>אין תור (נתון). אין ראוטרים בדרך — רק לינק ישיר.</p>
+        $$d_{total} = d_{proc} + d_{trans} + d_{prop}$$
+        $$d_{total} = 120 + 100 + 85{,}000 = 85{,}220 \, \mu\text{sec}$$
+      </div>
+      <div class="final-answer">סה״כ: <strong>85,220 µsec ≈ 85.22 ms</strong>. אפשר לראות שהפרופגיישן (5000 ק״מ!) הוא הגורם הדומיננטי — הוא מהווה ‎99.7% מההשהיה.</div>
+    </div>
+  </div>
+
+  <div class="exercise-card">
+    <div class="exercise-q">
+      <span class="exercise-tag">דוגמה מהרצאה · 4 פאקטות עם 2 ראוטרים</span>
+      <p>נשלחת חבילת מידע של <span class="term">L = 80,000</span> ביטים מ-S ל-T דרך שני ראוטרים R1 ו-R2. החבילה מחולקת ל-4 פאקטות באורך <span class="term">20,000</span> ביטים כל אחת.</p>
+      <ul>
+        <li>המרחק בין S↔R1 ובין R2↔T זניח</li>
+        <li>המרחק R1↔R2: <span class="term">d = 400 km = 400,000 m</span></li>
+        <li>מהירות פרופגיישן: <span class="term">s = 2 × 10⁸ m/s</span></li>
+        <li>רוחב פס: <span class="term">R = 10 Mbps = 10⁷ bps</span></li>
+        <li>זמני עיבוד וזמני המתנה זניחים</li>
+      </ul>
+      <p>חשבו את סך כל ההשהיה לכל ה-4 פאקטות.</p>
+    </div>
+    <button class="reveal-btn">הראה פתרון</button>
+    <div class="solution">
+      <div class="step">
+        <div class="step-label">חישוב טרנסמישן לפאקטה אחת</div>
+        <p>שים לב — לפאקטה אחת בלבד! לא לכל ה-80,000.</p>
+        $$d_{trans}^{(1)} = \frac{20{,}000}{10^7} = 0.002 \, \text{sec} = 2 \, \text{ms}$$
+      </div>
+      <div class="step">
+        <div class="step-label">ספירת טרנסמישנים</div>
+        <p>הפאקטות יוצאות מ-<span class="term">S → R1 → R2 → T</span>. T רק מקבל. אז כל פאקטה עוברת 3 טרנסמישנים: ב-S, ב-R1, וב-R2.</p>
+        <p>אבל — אנחנו לא סוכמים פאקטה-פאקטה! יש <strong>צנרת (pipelining)</strong> — בזמן ש-R1 משדר פאקטה 1, S כבר שולח את פאקטה 2 ל-R1.</p>
+        <p>הספירה הנכונה היא:</p>
+        <ul>
+          <li><strong><span class="term">S → R1</span>: 4 טרנסמישנים</strong> (אחד אחר השני, כל אחד 2 ms)</li>
+          <li><strong><span class="term">R1 → R2</span>: 1 טרנסמישן</strong> נספר! (פאקטות 2,3,4 משדרות במקביל לקבלת הפאקטות הבאות ב-R1)</li>
+          <li><strong><span class="term">R2 → T</span>: 1 טרנסמישן</strong> (אותו עיקרון)</li>
+        </ul>
+        <p>סה״כ <strong>6 טרנסמישנים</strong> לסכימה.</p>
+        $$d_{trans}^{total} = 6 \times 2 \, \text{ms} = 12 \, \text{ms}$$
+      </div>
+      <div class="step">
+        <div class="step-label">חישוב פרופגיישן</div>
+        <p>קורה רק בקטע R1 ↔ R2.</p>
+        $$d_{prop} = \frac{400{,}000}{2 \times 10^8} = 0.002 \, \text{sec} = 2 \, \text{ms}$$
+      </div>
+      <div class="step">
+        <div class="step-label">סיכום</div>
+        $$d_{total} = d_{trans}^{total} + d_{prop} = 12 + 2 = 14 \, \text{ms}$$
+      </div>
+      <div class="final-answer">סה״כ: <strong>14 ms</strong>. שים לב — פיצול ל-4 פאקטות חוסך זמן לעומת שליחה של פאקטה אחת ענקית! (במקרה הזה: ‎14 ms vs ‎26 ms עבור פאקטה יחידה).</div>
+    </div>
+  </div>
+
+  <div class="exercise-card">
+    <div class="exercise-q">
+      <span class="exercise-tag">תרגול עצמי · השוואה מהירה</span>
+      <p>בלינק עם פרופגיישן 50 ms ורוחב פס 1 Gbps, ביט בודד עובר ב-50 ms. אם פאקטה היא 8000 ביטים, כמה זמן לוקח לטרנסמט אותה?</p>
+      <p>ומה גדול יותר — d_trans או d_prop?</p>
+    </div>
+    <button class="reveal-btn">הראה פתרון</button>
+    <div class="solution">
+      <div class="step">
+        <div class="step-label">חישוב טרנסמישן</div>
+        $$d_{trans} = \frac{8000}{10^9} = 8 \times 10^{-6} \, \text{sec} = 8 \, \mu\text{sec}$$
+      </div>
+      <div class="step">
+        <div class="step-label">השוואה</div>
+        <p>d_trans = 8 µs · d_prop = 50,000 µs = 50 ms</p>
+        <p>d_prop גדול פי <strong>6,250</strong> מ-d_trans!</p>
+      </div>
+      <div class="final-answer">בלינקים ארוכים (סיב אופטי טרנס-אטלנטי, לוויין) — הפרופגיישן הוא הגורם השולט. בלינקים מקומיים — הטרנסמישן והתור משחקים תפקיד גדול יותר.</div>
+    </div>
+  </div>
+
+  <h2>אובדן פאקטות</h2>
+
+  <div class="box theory">
+    <div class="box-head"><span class="icon">📘</span>מתי פאקטה אובדת</div>
+    <div class="box-body">
+      <p>לכל באפר (תור) בראוטר יש <strong>גודל סופי</strong>. כשהקצב הנכנס גבוה מהקצב היוצא לאורך זמן, התור מתמלא. <strong>פאקטה שמגיעה לתור מלא — נאבדת.</strong></p>
+      <p>מי אחראי לטפל בזה? לא הראוטר. השכבות העליונות (בעיקר TCP) יבחינו שההודעה לא הגיעה ויעשו <strong>retransmission</strong>.</p>
+      <p>נושא זה יורחב בפרק 2.3 (TCP) ו-2.6 (בקרת גודש).</p>
+    </div>
+  </div>
+
+  <div class="box summary">
+    <div class="box-head"><span class="icon">📌</span>סיכום הפרק</div>
+    <div class="box-body">
+      <ul>
+        <li>4 סוגי דיליי: <strong>עיבוד, תור, טרנסמישן, פרופגיישן</strong></li>
+        <li>טרנסמישן = <span class="term">L/R</span> (זמן <em>להוציא</em> ביטים — תלוי בגודל פאקטה ורוחב פס)</li>
+        <li>פרופגיישן = <span class="term">d/s</span> (זמן <em>לעבור</em> פיזית — תלוי במרחק ומהירות אור)</li>
+        <li>Nodal Delay = סכום של ה-4 (לקודקוד אחד)</li>
+        <li>במסלול עם N קודקודים — סוכמים את ה-nodal של כל אחד</li>
+        <li>Throughput = <span class="term">min(R₁, ..., Rₙ)</span> — צוואר הבקבוק</li>
+        <li>פאקטה אובדת כשהבאפר מלא</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- chapter content ends above this line -->
+
+
+<nav class="pager" aria-label="ניווט בין נושאים">
+  <a class="prev" href="00-intro.html"><span class="dir">→ לנושא הקודם</span><span class="name">רשת האינטרנט והשכבות</span></a>
+  <a class="next" href="02-app-sockets.html"><span class="dir">לנושא הבא ←</span><span class="name">סוקטים, לקוח-שרת, P2P</span></a>
+</nav>
+
+</main>
+
+</div>
+
+<script>
+/* ===== glossary-tooltips-v1 =====
+   Wraps known technical terms in <span class="gloss" data-tip="..."> after
+   KaTeX finishes rendering. DOM TreeWalker on text nodes only, so it never
+   touches attributes, math, code blocks, links, or the sidebar. */
+(function () {
+  const GLOSSARY = {
+    // --- Transport ---
+    'TCP': 'Transmission Control Protocol — פרוטוקול תעבורה אמין ומבוסס-חיבור בשכבה 4. מבטיח סדר וללא איבוד.',
+    'UDP': 'User Datagram Protocol — פרוטוקול תעבורה ללא חיבור בשכבה 4. מהיר, בלי ערבויות.',
+    'RUDP': 'Reliable UDP — תוספת מנגנוני אמינות (ACK, מספור) מעל UDP באפליקציה.',
+    'RTT': 'Round Trip Time — הזמן שלוקח לחבילה להגיע ליעד ולחזור עם אישור.',
+    'ACK': 'Acknowledgment — אישור קבלה של סגמנט/פריים.',
+    'SEQ': 'Sequence Number — מספר סידורי של הבית הראשון בסגמנט TCP.',
+    'ISN': 'Initial Sequence Number — מספר הסידורי ההתחלתי שנבחר אקראית ב-handshake.',
+    'SYN': 'Synchronize — דגל TCP לפתיחת חיבור (שלב 1 ו-2 ב-3-Way Handshake).',
+    'FIN': 'Finish — דגל TCP לסגירה מסודרת של חיבור.',
+    'MSS': 'Maximum Segment Size — גודל מרבי של חלק הנתונים בסגמנט TCP.',
+    'RDT': 'Reliable Data Transfer — משפחת פרוטוקולים תיאורטיים (rdt1.0–3.0) להעברה אמינה.',
+    'CW': 'Congestion Window — חלון הגודש: כמה בייטים מותר לשלוח בלי אישור, לפי מצב הרשת.',
+    'RW': 'Receive Window — חלון הקבלה: כמה מקום פנוי נשאר בבאפר של המקבל (בקרת זרימה).',
+    'AIMD': 'Additive Increase Multiplicative Decrease — עלייה ליניארית, ירידה כפולית: העיקרון של בקרת גודש ב-TCP.',
+    'ssthresh': 'Slow Start Threshold — הסף שמפריד בין Slow Start (גדילה מעריכית) ל-Congestion Avoidance (ליניארית).',
+
+    // --- Network ---
+    'IP': 'Internet Protocol — פרוטוקול הרשת בשכבה 3: כתובות וניתוב, ללא אמינות.',
+    'IPv4': 'Internet Protocol version 4 — הגרסה הקלאסית, כתובות של 32 ביט.',
+    'IPv6': 'Internet Protocol version 6 — הגרסה החדשה, כתובות של 128 ביט.',
+    'NAT': 'Network Address Translation — מיפוי כתובות פרטיות לכתובת ציבורית אחת לפי פורטים.',
+    'DHCP': 'Dynamic Host Configuration Protocol — מקצה כתובות IP אוטומטית (תהליך DORA).',
+    'DORA': 'Discover, Offer, Request, ACK — ארבעת שלבי הקצאת כתובת ב-DHCP.',
+    'ICMP': 'Internet Control Message Protocol — הודעות שגיאה ובקרה בשכבת הרשת (ping, TTL exceeded).',
+    'TTL': 'Time To Live — מונה קפיצות בכותרת IP; יורד ב-1 בכל ראוטר, ב-0 החבילה נזרקת.',
+    'CIDR': 'Classless Inter-Domain Routing — רישום כתובת/פריפיקס (למשל ‎/24) במקום מחלקות.',
+    'AS': 'Autonomous System — מערכת אוטונומית: אוסף רשתות תחת ניהול אחד (למשל ספקית).',
+    'OSPF': 'Open Shortest Path First — פרוטוקול ניתוב תוך-AS מבוסס Link State (דייקסטרה).',
+    'BGP': 'Border Gateway Protocol — פרוטוקול הניתוב בין AS-ים, מבוסס Path Vector ומדיניות.',
+    'RIP': 'Routing Information Protocol — פרוטוקול ניתוב מבוסס Distance Vector (בלמן-פורד).',
+    'DV': 'Distance Vector — גישת ניתוב מבוזרת: כל ראוטר משתף שכנים בטבלת המרחקים שלו.',
+    'LS': 'Link State — גישת ניתוב גלובלית: כל ראוטר מכיר את כל הטופולוגיה ומריץ דייקסטרה.',
+
+    // --- Application ---
+    'HTTP': 'Hypertext Transfer Protocol — פרוטוקול הבקשות/תשובות של ה-web, מעל TCP פורט 80.',
+    'HTTPS': 'HTTP Secure — HTTP מעל SSL/TLS, פורט 443, לתקשורת מוצפנת.',
+    'HTML': 'Hypertext Markup Language — שפת הסימון של דפי web.',
+    'DNS': 'Domain Name System — ממיר שמות דומיין לכתובות IP. היררכי, מעל UDP פורט 53.',
+    'TLD': 'Top Level Domain — הרמה העליונה בהיררכיית DNS‏ (com, org, il).',
+    'CNAME': 'Canonical Name — רשומת DNS שממפה שם נרדף לשם הקנוני.',
+    'ICANN': 'Internet Corporation for Assigned Names and Numbers — הגוף שמנהל שמות דומיין וכתובות.',
+    'SMTP': 'Simple Mail Transfer Protocol — פרוטוקול שליחת דואר, מעל TCP פורט 25.',
+    'IMAP': 'Internet Message Access Protocol — פרוטוקול גישה לתיבת דואר בשרת.',
+    'FTP': 'File Transfer Protocol — פרוטוקול העברת קבצים עם חיבור בקרה וחיבור נתונים נפרדים.',
+    'URL': 'Uniform Resource Locator — כתובת של משאב ברשת: פרוטוקול, שרת ונתיב.',
+    'P2P': 'Peer to Peer — ארכיטקטורה בלי שרת מרכזי: הקצוות מדברים ישירות זה עם זה.',
+    'API': 'Application Programming Interface — ממשק תכנותי בין רכיבי תוכנה (למשל Socket API).',
+
+    // --- Link ---
+    'MAC': 'Media Access Control — כתובת חומרה של 48 ביט של כרטיס הרשת; וגם שכבת הגישה לערוץ.',
+    'ARP': 'Address Resolution Protocol — מוצא כתובת MAC עבור כתובת IP ידועה באותה רשת.',
+    'CSMA/CD': 'CSMA with Collision Detection — מאזין לפני שידור ומזהה התנגשות תוך כדי (Ethernet קווי).',
+    'CSMA': 'Carrier Sense Multiple Access — פרוטוקול גישה לערוץ: מאזין לפני ששולח.',
+    'ALOHA': 'פרוטוקול הגישה האקראית הראשון: משדרים בלי להאזין. ניצולת מקס׳ 18% (או 37% ב-Slotted).',
+    'TDMA': 'Time Division Multiple Access — חלוקת הערוץ לפרוסות זמן קבועות בין המשתמשים.',
+    'FDMA': 'Frequency Division Multiple Access — חלוקת הערוץ לתדרים קבועים בין המשתמשים.',
+    'CRC': 'Cyclic Redundancy Check — קוד גילוי שגיאות שמחושב לכל פריים בשכבת הקישור.',
+    'OUI': 'Organizationally Unique Identifier — שלושת הבייטים הראשונים בכתובת MAC, מזהים את היצרן.',
+    'LAN': 'Local Area Network — רשת מקומית (בניין/קמפוס), בדרך כלל Ethernet או WiFi.',
+    'Ethernet': 'טכנולוגיית ה-LAN הקווית הנפוצה: פריימים עם כתובות MAC, ‏CSMA/CD היסטורית.',
+
+    // --- Security ---
+    'RSA': 'Rivest–Shamir–Adleman — אלגוריתם הצפנה אסימטרי (מפתח ציבורי) מבוסס פירוק לגורמים.',
+    'AES': 'Advanced Encryption Standard — אלגוריתם ההצפנה הסימטרי הסטנדרטי כיום.',
+    '3DES': 'Triple DES — הפעלת DES שלוש פעמים ברצף לחיזוק המפתח.',
+    'DES': 'Data Encryption Standard — אלגוריתם הצפנה סימטרי ישן (מפתח 56 ביט, נחשב חלש).',
+    'TLS': 'Transport Layer Security — היורש המודרני של SSL; מצפין תעבורה מעל TCP.',
+    'SSL': 'Secure Sockets Layer — שכבת הצפנה בין האפליקציה ל-TCP‏; הבסיס של HTTPS.',
+    'PK': 'Public Key — המפתח הציבורי: גלוי לכולם, מצפינים איתו הודעות אל הבעלים.',
+    'SK': 'Secret/Private Key — המפתח הפרטי: רק הבעלים מחזיק בו, מפענח וחותם.',
+    'DDoS': 'Distributed Denial of Service — מתקפת מניעת שירות ממקורות רבים במקביל.',
+    'DoS': 'Denial of Service — מתקפה שמציפה שרת בבקשות עד שקורס או לא זמין.',
+
+    // --- General ---
+    'ISP': 'Internet Service Provider — ספקית שירותי אינטרנט.',
+    'OSI': 'Open Systems Interconnection — מודל 7 השכבות של ISO.',
+    'ISO': 'International Organization for Standardization — ארגון התקנים הבינלאומי.',
+    'MTU': 'Maximum Transmission Unit — הגודל המרבי של חבילה בלינק; מעליו נדרשת פרגמנטציה.',
+  };
+
+  const TERMS = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length);
+  const PATTERN = TERMS
+    .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|');
+  // Whole word: no Latin letter/digit before or after (Hebrew around is fine)
+  const RE = new RegExp('(?<![A-Za-z0-9])(' + PATTERN + ')(?![A-Za-z0-9])', 'g');
+
+  const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'CODE', 'PRE', 'TEXTAREA', 'A', 'BUTTON', 'H1']);
+
+  function insideSkipped(el) {
+    for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
+      if (SKIP_TAGS.has(n.tagName)) return true;
+      const c = n.classList;
+      if (c && (c.contains('gloss') || c.contains('katex') ||
+                c.contains('katex-display') || c.contains('sidebar'))) return true;
+    }
+    return false;
+  }
+
+  function run() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const t = node.nodeValue;
+        if (!t || t.indexOf('$') !== -1) return NodeFilter.FILTER_REJECT; // leave raw math alone
+        RE.lastIndex = 0;
+        if (!RE.test(t)) return NodeFilter.FILTER_REJECT;
+        if (insideSkipped(node.parentElement)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    for (const node of nodes) {
+      const text = node.nodeValue;
+      const frag = document.createDocumentFragment();
+      let last = 0, m;
+      RE.lastIndex = 0;
+      while ((m = RE.exec(text)) !== null) {
+        if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        const span = document.createElement('span');
+        span.className = 'gloss';
+        span.setAttribute('data-tip', GLOSSARY[m[1]]);
+        span.textContent = m[1];
+        frag.appendChild(span);
+        last = m.index + m[1].length;
+      }
+      if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+      node.parentNode.replaceChild(frag, node);
+    }
+
+    // Touch devices: tap toggles the tooltip (hover doesn't exist on mobile)
+    document.body.addEventListener('click', (e) => {
+      const g = e.target.closest('.gloss');
+      document.querySelectorAll('.gloss.tap').forEach(x => { if (x !== g) x.classList.remove('tap'); });
+      if (g) g.classList.toggle('tap');
+    });
+  }
+
+  // Registered after the head script's DOMContentLoaded listener,
+  // so this runs AFTER renderMathInElement has replaced $...$ with KaTeX spans.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
+</script>
+
+</body>
+</html>
