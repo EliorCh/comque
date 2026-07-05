@@ -235,7 +235,7 @@ window.QUESTIONS = [
     source: "2024 סמסטר ב' מועד 1 + 2023 סמסטר ב' מועד 1",
     question: "ברשת המתוארת [LAN1 - Router - LAN2] בה מארח A במצרפת רשת ורוצה לבקש אובייקט HTTP ממארח C, ובהינתן שכל ה-caches ריקים והנתב הוא ה-Local Name Server של LAN1, מה ההודעה השנייה שמשתשלחת על הקווים?",
     image: "img/q16-lan-router-lan.png",
-    imageCaption: "התרשים המקורי מהמבחן: LAN1 (מארחים A, B) - Router - LAN2 (מארחים C, D)",
+    imageCaption: "התרשים המקורי מהמבחן - רשת LAN1 (מארחי A, B) מחוברת דרך Router לרשת LAN2 (מארחי C, D)",
     options: [
       "DNS Reply",
       "ARP Reply",

@@ -774,16 +774,17 @@ function renderText(text) {
   const inner = "[A-Za-z0-9_<>\\-+=:;/\\\\.,()\\[\\]{}@#$%^&*'\"`~?!|\u00B7\u00B1\u00D7\u00F7\u00B0\u2030\u0370-\u03FF\u2070-\u209F\u2200-\u22FF\u2190-\u21FF]";
   const start = "[A-Za-z0-9\u0370-\u03FF]";
   const piece = `${start}${inner}*`;
-  // A bridged piece (one that follows a math gap) may also begin with an opening
-  // bracket or a numeric/absolute-value char, so a formula like
-  // "DevRTT = (1-β)·DevRTT + β·|SampleRTT - EstimatedRTT|" stays a single LTR run
-  // instead of fragmenting at "(" or "|". Leading brackets are only allowed on
-  // bridged pieces (not the first), so a "(" from Hebrew prose is never absorbed.
-  const bridgedPiece = `[\\(\\[\\{|]?${start}${inner}*|[\\(\\[\\{|]${inner}*`;
-  // A run may continue across a space if the space is followed by a math /
-  // comparison operator and another space (e.g. "A > B", "L / R", "68 > 63").
-  const gap = `[ ]+(?:[=+\\-*/×÷·|<>\u00B1][ ]+)?`;
-  const re = new RegExp(`(${piece}(?:${gap}(?:${bridgedPiece}))*)`, 'g');
+  // A piece bridged across a MATH-OPERATOR gap (e.g. "= (1-β)") may begin with an
+  // opening bracket or |, so a formula like
+  // "DevRTT = (1-β)·DevRTT + β·|SampleRTT - EstimatedRTT|" stays one LTR run.
+  const mathPiece = `[\\(\\[\\{|]?${start}${inner}*|[\\(\\[\\{|]${inner}*`;
+  // A piece bridged across a PLAIN SPACE must start with an alphanumeric — this
+  // prevents "LAN1 (מארחים...)" from pulling the "(" into the LAN1 run (which
+  // then orphans the paren when the Hebrew word breaks the run).
+  const plainPiece = piece;
+  const mathGap = `[ ]+[=+\\-*/×÷·|<>\u00B1][ ]+`;
+  const spaceGap = `[ ]+`;
+  const re = new RegExp(`(${piece}(?:(?:${mathGap}(?:${mathPiece}))|(?:${spaceGap}(?:${plainPiece})))*)`, 'g');
 
   const PLACEHOLDER = '\u0000';
   const runs = [];
