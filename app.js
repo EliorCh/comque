@@ -750,31 +750,95 @@ function showToast(msg) {
 // Also: trailing sentence-ending punctuation (?, !, .) is moved OUT of
 // the LTR span so it sits at the proper end of the Hebrew sentence
 // rather than at the right edge of the LTR run.
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function renderText(text) {
   if (!text) return '';
-  // escape HTML
-  text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  const inner = "[A-Za-z0-9_\\-+=:;/\\\\.,()\\[\\]{}@#$%^&*'\"`~?!|\u00B7\u00B1\u00D7\u00F7\u00B0\u2030\u0370-\u03FF\u2070-\u209F\u2200-\u22FF\u2190-\u21FF]";
+  // Normalize inline numbered lists written with parenthesized markers
+  // "(1) x (2) y (3) z" or "(1) x, (2) y" mid-sentence: these render badly in
+  // RTL (each "(N)" splits and the items reorder visually). If the text has a
+  // "(1)" marker followed later by "(2)", put items 2+ on their own line. The
+  // "(1)" item stays in place; a blank line before "(1)" is left to the author.
+  if (/\(1\)\s/.test(text) && /\(2\)\s/.test(text)) {
+    text = text.replace(/[,;]?\s+(\([2-9]\))\s/g, '\n$1 ');
+  }
+
+  // We wrap LTR runs (English / numbers / math) in <span class="ltr"> BEFORE
+  // escaping, so comparison operators like > and < can live inside a run
+  // (e.g. "68 > 63") without the escaped entity (&gt;) being torn apart by the
+  // matcher. Each matched run is HTML-escaped inside the replacement; the
+  // Hebrew text between runs is escaped separately afterwards.
+  const inner = "[A-Za-z0-9_<>\\-+=:;/\\\\.,()\\[\\]{}@#$%^&*'\"`~?!|\u00B7\u00B1\u00D7\u00F7\u00B0\u2030\u0370-\u03FF\u2070-\u209F\u2200-\u22FF\u2190-\u21FF]";
   const start = "[A-Za-z0-9\u0370-\u03FF]";
-  const open = "[\\(\\[\\{]?";
-  const piece = `${open}${start}${inner}*`;
-  const gap = `[ ]+(?:[=+\\-*/×÷·|\u00B1][ ]+)?`;
-  const re = new RegExp(`(${piece}(?:${gap}${piece})*)`, 'g');
+  const piece = `${start}${inner}*`;
+  // A bridged piece (one that follows a math gap) may also begin with an opening
+  // bracket or a numeric/absolute-value char, so a formula like
+  // "DevRTT = (1-β)·DevRTT + β·|SampleRTT - EstimatedRTT|" stays a single LTR run
+  // instead of fragmenting at "(" or "|". Leading brackets are only allowed on
+  // bridged pieces (not the first), so a "(" from Hebrew prose is never absorbed.
+  const bridgedPiece = `[\\(\\[\\{|]?${start}${inner}*|[\\(\\[\\{|]${inner}*`;
+  // A run may continue across a space if the space is followed by a math /
+  // comparison operator and another space (e.g. "A > B", "L / R", "68 > 63").
+  const gap = `[ ]+(?:[=+\\-*/×÷·|<>\u00B1][ ]+)?`;
+  const re = new RegExp(`(${piece}(?:${gap}(?:${bridgedPiece}))*)`, 'g');
 
+  const PLACEHOLDER = '\u0000';
+  const runs = [];
+  // Replace each LTR run with a placeholder, remembering its escaped HTML.
   text = text.replace(re, m => {
-    // Move trailing sentence-ending punctuation (?, !, .) outside the span.
-    // Keep internal punctuation (commas, semicolons, colons, math) inside.
-    const trailing = m.match(/[?!.]+$/);
+    // Move trailing punctuation that belongs to the RTL sentence outside the
+    // span: sentence-enders (? ! .) and also , : ; — a run ends at an LTR→RTL
+    // boundary, so a comma/colon there is the Hebrew sentence's, not the term's
+    // (fixes "IPv4," rendering the comma on the wrong side). We keep at most the
+    // trailing punctuation run; internal commas (f(x,y), 1,000) are untouched
+    // because they're not at the run's end.
+    const trailing = m.match(/[?!.,:;]+$/);
+    let core = m, tail = '';
     if (trailing) {
       const ltrPart = m.slice(0, m.length - trailing[0].length);
-      // Only split if there's still a real LTR token before the punctuation
       if (ltrPart && /[A-Za-z0-9\u0370-\u03FF]/.test(ltrPart)) {
-        return `<span class="ltr">${ltrPart}</span>${trailing[0]}`;
+        core = ltrPart;
+        tail = trailing[0];
       }
     }
-    return `<span class="ltr">${m}</span>`;
+    // Balance brackets: if the run ends with a closing bracket that has no
+    // matching opener INSIDE the run, evict it so it stays in the RTL flow and
+    // pairs with its opener there. (Prevents "(16 ביטים)" from splitting so the
+    // parens mismatch.) Same idea for a leading opener with no inner closer.
+    const pairs = { ')': '(', ']': '[', '}': '{' };
+    let moved = '';
+    let guard = 0;
+    while (guard++ < 8) {
+      const last = core[core.length - 1];
+      if (pairs[last]) {
+        const opener = pairs[last];
+        const opens = (core.match(new RegExp('\\' + opener, 'g')) || []).length;
+        const closes = (core.match(new RegExp('\\' + last, 'g')) || []).length;
+        if (closes > opens) { moved = escapeHtml(last) + moved; core = core.slice(0, -1); continue; }
+      }
+      break;
+    }
+    runs.push(`<span class="ltr">${escapeHtml(core)}</span>${moved}${escapeHtml(tail)}`);
+    return PLACEHOLDER + (runs.length - 1) + PLACEHOLDER;
   });
+
+  // Escape the Hebrew/other text that sits between the runs.
+  text = escapeHtml(text);
+
+  // Restore the runs.
+  text = text.replace(new RegExp(PLACEHOLDER + '(\\d+)' + PLACEHOLDER, 'g'), (_, i) => runs[+i]);
+
+  // Auto-break inline numbered lists: a marker like "2)" or "3)" that follows
+  // ", " or "; " starts a new line, so "1) ... , 2) ... , 3) ..." stacks
+  // vertically instead of running together (which reads badly in RTL). The
+  // first item ("1)") is left in place; we only break BEFORE items 2 and on.
+  // We require the "N)" to be followed by a space so "(שכבה 4)" is never hit.
+  if (/(?:^|[\s>])1\)\s/.test(text)) {
+    text = text.replace(/(?:,|;)\s+([2-9]\))\s/g, '\n$1 ');
+  }
 
   // line breaks
   text = text.replace(/\n/g, '<br>');
@@ -787,6 +851,10 @@ function renderText(text) {
 // the intro text and the actual question).
 function renderQuestionBody(q) {
   let html = renderText(q.question);
+  if (q.image) {
+    const cap = q.imageCaption ? `<div class="q-image-caption">${renderText(q.imageCaption)}</div>` : '';
+    html += `<figure class="q-image-wrap"><img class="q-image" src="${q.image}" alt="תרשים לשאלה" loading="lazy">${cap}</figure>`;
+  }
   if (q.dataTable) {
     const t = q.dataTable;
     html += '<table class="data-table">';
