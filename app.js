@@ -454,9 +454,11 @@ const Practice = {
     if (!btn || btn.dataset.bound) return;
     btn.dataset.bound = '1';
     btn.addEventListener('click', () => {
-      // Each click re-shuffles the currently filtered set into a new random order.
+      // Each click re-shuffles the currently filtered set into a new random order,
+      // and also re-randomizes the option order within each question.
       this.shuffled = true;
       this.order = shuffle(this.getFiltered().map(q => q.id));
+      this.optionOrder = {};
       btn.classList.add('active');
       this.renderQuestions();
       showToast('השאלות עורבבו');
@@ -507,7 +509,22 @@ const Practice = {
     // resolveVariant: calculation questions show random numbers each render
     const filtered = this.getFiltered().map(resolveVariant);
     this.resolved = {};
-    filtered.forEach(q => { this.resolved[q.id] = q; });
+    // Build a per-session shuffled option order for each question, so the correct
+    // answer isn't always in the same position (otherwise a student memorizes
+    // "the answer is always א"). "כל התשובות האחרות" style options are pinned last
+    // for readability. optionOrder[id][displaySlot] = original option index.
+    this.optionOrder = this.optionOrder || {};
+    filtered.forEach(q => {
+      this.resolved[q.id] = q;
+      if (!this.optionOrder[q.id]) {
+        const perm = q.options.map((_, i) => i);
+        shuffle(perm);
+        // pin any "all others are wrong" option to the last slot
+        const awPos = perm.findIndex(oi => typeof q.options[oi] === 'string' && /כל התשובות האחרות/.test(q.options[oi]));
+        if (awPos >= 0) { const [aw] = perm.splice(awPos, 1); perm.push(aw); }
+        this.optionOrder[q.id] = perm;
+      }
+    });
     document.getElementById('filter-summary').textContent = `${filtered.length} שאלות`;
 
     const container = document.getElementById('practice-questions');
@@ -526,15 +543,18 @@ const Practice = {
     container.querySelectorAll('.option-item').forEach(btn => {
       btn.addEventListener('click', () => {
         const qId = parseInt(btn.closest('[data-qid]').dataset.qid);
-        const oIdx = parseInt(btn.dataset.option);
+        const displaySlot = parseInt(btn.dataset.option);       // slot as shown
+        const order = this.optionOrder[qId] || [0, 1, 2, 3, 4];
+        const oIdx = order[displaySlot];                          // original index chosen
         const card = btn.closest('.practice-question');
 
-        // disable all options
-        card.querySelectorAll('.option-item').forEach((opt, i) => {
+        // disable all options; mark correct/incorrect by ORIGINAL index behind each slot
+        card.querySelectorAll('.option-item').forEach((opt, slot) => {
           opt.disabled = true;
           const q = this.resolved?.[qId] || QUESTIONS.find(qq => qq.id === qId);
-          if (i === q.correctIndex) opt.classList.add('correct');
-          else if (i === oIdx && i !== q.correctIndex) opt.classList.add('incorrect');
+          const origBehindSlot = order[slot];
+          if (origBehindSlot === q.correctIndex) opt.classList.add('correct');
+          else if (origBehindSlot === oIdx && oIdx !== q.correctIndex) opt.classList.add('incorrect');
         });
 
         // show explanation
@@ -560,6 +580,9 @@ const Practice = {
 
   renderPracticeQuestion(q, idx) {
     const isMarked = State.isMarked(q.id);
+    const order = this.optionOrder[q.id] || q.options.map((_, i) => i);
+    // Which display slot holds the correct answer (for the explanation label).
+    const correctSlot = order.indexOf(q.correctIndex);
     return `
       <div class="practice-question" data-qid="${q.id}">
         <div class="practice-q-header">
@@ -573,15 +596,15 @@ const Practice = {
         </div>
         <div class="question-text">${renderQuestionBody(q)}</div>
         <div class="options-list">
-          ${q.options.map((opt, i) => `
-            <button class="option-item" data-option="${i}">
-              <span class="option-letter">${'אבגדה'[i]}.</span>
-              <span class="option-text">${renderOptionContent(opt)}</span>
+          ${order.map((origIdx, slot) => `
+            <button class="option-item" data-option="${slot}">
+              <span class="option-letter">${'אבגדה'[slot]}.</span>
+              <span class="option-text">${renderOptionContent(q.options[origIdx])}</span>
             </button>
           `).join('')}
         </div>
         <div class="explanation" style="display: none;">
-          <div class="explanation-label">הסבר · התשובה הנכונה: ${'אבגדה'[q.correctIndex]}</div>
+          <div class="explanation-label">הסבר · התשובה הנכונה: ${'אבגדה'[correctSlot]}</div>
           <div class="explanation-body">${renderText(q.explanation)}</div>
         </div>
       </div>
