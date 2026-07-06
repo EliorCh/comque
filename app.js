@@ -231,7 +231,7 @@ const Exam = {
           ${perm.map((origIdx, displayIdx) => `
             <button class="option-item ${selectedDisplay === displayIdx ? 'selected' : ''}" data-display="${displayIdx}" data-orig="${origIdx}">
               <span class="option-letter">${'אבגדה'[displayIdx]}.</span>
-              <span class="option-text">${renderText(q.options[origIdx])}</span>
+              <span class="option-text">${renderOptionContent(q.options[origIdx])}</span>
             </button>
           `).join('')}
         </div>
@@ -404,7 +404,7 @@ const Exam = {
                   return `
                     <div class="option-item ${cls}" style="cursor: default;">
                       <span class="option-letter">${'אבגדה'[oi]}.</span>
-                      <span class="option-text">${renderText(opt)}</span>
+                      <span class="option-text">${renderOptionContent(opt)}</span>
                     </div>
                   `;
                 }).join('')}
@@ -576,7 +576,7 @@ const Practice = {
           ${q.options.map((opt, i) => `
             <button class="option-item" data-option="${i}">
               <span class="option-letter">${'אבגדה'[i]}.</span>
-              <span class="option-text">${renderText(opt)}</span>
+              <span class="option-text">${renderOptionContent(opt)}</span>
             </button>
           `).join('')}
         </div>
@@ -635,7 +635,7 @@ const Browse = {
                       ${q.options.map((opt, i) => `
                         <div class="option-item ${i === q.correctIndex ? 'correct' : ''}" style="cursor: default;">
                           <span class="option-letter">${'אבגדה'[i]}.</span>
-                          <span class="option-text">${renderText(opt)}</span>
+                          <span class="option-text">${renderOptionContent(opt)}</span>
                         </div>
                       `).join('')}
                     </div>
@@ -896,6 +896,42 @@ function renderText(text) {
 // If q.dataTable is set, render it as an HTML table. If q.questionEnd is
 // also set, render that text after the table (so the table sits between
 // the intro text and the actual question).
+function renderMiniTable(t) {
+  let html = '<table class="data-table option-table">';
+  if (t.headers && t.headers.length) {
+    html += '<thead><tr>' + t.headers.map(h => `<th>${renderText(h)}</th>`).join('') + '</tr></thead>';
+  }
+  if (t.rows && t.rows.length) {
+    html += '<tbody>';
+    for (const row of t.rows) {
+      html += '<tr>' + row.map(cell => `<td>${renderText(String(cell))}</td>`).join('') + '</tr>';
+    }
+    html += '</tbody>';
+  }
+  html += '</table>';
+  return html;
+}
+
+// An option can be a plain string or an object { table: {headers, rows}, label? }.
+// This lets choices that are themselves small tables (e.g. competing subnet
+// plans) render as real tables instead of a long comma-separated string, so no
+// answer-letter references are needed and shuffling stays safe.
+function renderOptionContent(opt) {
+  if (opt && typeof opt === 'object' && opt.table) {
+    return (opt.label ? `<div class="option-table-label">${renderText(opt.label)}</div>` : '') + renderMiniTable(opt.table);
+  }
+  return renderText(String(opt));
+}
+
+// Plain-text form of an option (for aria/labels/logic that needs a string).
+function optionText(opt) {
+  if (opt && typeof opt === 'object' && opt.table) {
+    const t = opt.table;
+    return (t.rows || []).map(r => r.join(' / ')).join(' ; ');
+  }
+  return String(opt);
+}
+
 function renderQuestionBody(q) {
   let html = renderText(q.question);
   if (q.image) {
