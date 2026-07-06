@@ -812,7 +812,7 @@ function renderText(text) {
   // prevents "LAN1 (מארחים...)" from pulling the "(" into the LAN1 run (which
   // then orphans the paren when the Hebrew word breaks the run).
   const plainPiece = piece;
-  const mathGap = `[ ]+[=+\\-*/×÷·|<>\u00B1][ ]+`;
+  const mathGap = `[ ]+[=+\\-*/×÷·|<>&\u00B1][ ]+`;
   const spaceGap = `[ ]+`;
   const re = new RegExp(`(${piece}(?:(?:${mathGap}(?:${mathPiece}))|(?:${spaceGap}(?:${plainPiece})))*)`, 'g');
 
@@ -869,6 +869,14 @@ function renderText(text) {
 
   // Restore the runs.
   text = text.replace(new RegExp(PLACEHOLDER + '(\\d+)' + PLACEHOLDER, 'g'), (_, i) => runs[+i]);
+
+  // Bidi anchor: an opening bracket that sits between a closing LTR </span> and
+  // Hebrew text (e.g. "Playback Attack (התקפת השמעה חוזרת)") is a bidi-neutral
+  // character; the browser may resolve its direction toward the LTR side and
+  // render it on the wrong edge. Insert a Right-to-Left Mark (U+200F) before
+  // such a bracket so it anchors to the surrounding RTL context. We only touch
+  // brackets that are OUTSIDE spans (a run's own "(" is already inside the span).
+  text = text.replace(/(<\/span>)(\s*)([(\[{])(\s*[\u0590-\u05FF])/g, '$1$2\u200F$3$4');
 
   // Auto-break inline numbered lists: a marker like "2)" or "3)" that follows
   // ", " or "; " starts a new line, so "1) ... , 2) ... , 3) ..." stacks
