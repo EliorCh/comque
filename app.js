@@ -439,11 +439,28 @@ const Exam = {
 
 const Practice = {
   filters: { topics: new Set() },
+  shuffled: false,
+  order: null,
 
   show() {
     showView('practice');
     this.renderFilters();
+    this.bindShuffle();
     this.renderQuestions();
+  },
+
+  bindShuffle() {
+    const btn = document.getElementById('shuffle-btn');
+    if (!btn || btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => {
+      // Each click re-shuffles the currently filtered set into a new random order.
+      this.shuffled = true;
+      this.order = shuffle(this.getFiltered().map(q => q.id));
+      btn.classList.add('active');
+      this.renderQuestions();
+      showToast('השאלות עורבבו');
+    });
   },
 
   renderFilters() {
@@ -462,6 +479,11 @@ const Practice = {
         const topic = chip.dataset.topic;
         if (this.filters.topics.has(topic)) this.filters.topics.delete(topic);
         else this.filters.topics.add(topic);
+        // Changing the filter invalidates the shuffled order; reset to bank order.
+        this.shuffled = false;
+        this.order = null;
+        const sb = document.getElementById('shuffle-btn');
+        if (sb) sb.classList.remove('active');
         this.renderFilters();
         this.renderQuestions();
       });
@@ -469,8 +491,16 @@ const Practice = {
   },
 
   getFiltered() {
-    if (this.filters.topics.size === 0) return QUESTIONS;
-    return QUESTIONS.filter(q => this.filters.topics.has(q.topic));
+    let list = this.filters.topics.size === 0
+      ? QUESTIONS
+      : QUESTIONS.filter(q => this.filters.topics.has(q.topic));
+    // If a shuffled order is active, reorder the filtered list to match it.
+    if (this.shuffled && this.order) {
+      const pos = {};
+      this.order.forEach((id, i) => { pos[id] = i; });
+      list = [...list].sort((a, b) => (pos[a.id] ?? 0) - (pos[b.id] ?? 0));
+    }
+    return list;
   },
 
   renderQuestions() {
@@ -805,10 +835,18 @@ function renderText(text) {
         tail = trailing[0];
       }
     }
-    // Balance brackets: if the run ends with a closing bracket that has no
-    // matching opener INSIDE the run, evict it so it stays in the RTL flow and
-    // pairs with its opener there. (Prevents "(16 ביטים)" from splitting so the
-    // parens mismatch.) Same idea for a leading opener with no inner closer.
+    // Don't LTR-wrap a standalone number that sits in Hebrew context (e.g. the
+    // "5" in "(5 שכבות)", "4" in "שכבה 4", a year "2023", or "1,000"). Isolating
+    // such a number in its own span makes it read awkwardly next to the Hebrew.
+    // We DO still wrap numbers that carry LTR structure: IP addresses / version
+    // numbers (two or more dot/colon-separated groups), math operators
+    // (= < > / * + - · | %), a caret power, or an attached unit letter — those
+    // genuinely need left-to-right isolation.
+    const isBareNumber = /^[0-9]+(?:[.,][0-9]+)?$/.test(core);
+    if (isBareNumber) {
+      runs.push(escapeHtml(core) + escapeHtml(tail));
+      return PLACEHOLDER + (runs.length - 1) + PLACEHOLDER;
+    }
     const pairs = { ')': '(', ']': '[', '}': '{' };
     let moved = '';
     let guard = 0;

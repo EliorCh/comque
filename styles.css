@@ -272,6 +272,12 @@ body {
 .filter-chip[data-topic="security"] { --chip-color: var(--rose); --chip-bg: var(--rose-bg); --chip-text: var(--rose-text); }
 .filter-chip[data-topic="general"] { --chip-color: var(--teal); --chip-bg: var(--teal-bg); --chip-text: var(--teal-text); }
 .filter-summary { font-size: 13px; color: var(--muted); font-family: var(--font-mono); padding-top: 8px; }
+.filter-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.shuffle-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border: 1.5px solid var(--teal-soft); background: var(--teal-bg); color: var(--teal-text); border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.shuffle-btn:hover { background: var(--teal); color: #fff; border-color: var(--teal); }
+.shuffle-btn.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+.shuffle-btn .shuffle-icon { font-size: 15px; line-height: 1; }
+.shuffle-btn:active .shuffle-icon { transform: rotate(180deg); transition: transform 0.2s; }
 .practice-questions { display: flex; flex-direction: column; gap: 16px; }
 .practice-question { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 32px; box-shadow: var(--shadow); }
 .practice-q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
