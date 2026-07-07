@@ -580,7 +580,17 @@ const Practice = {
 
   renderPracticeQuestion(q, idx) {
     const isMarked = State.isMarked(q.id);
-    const order = this.optionOrder[q.id] || q.options.map((_, i) => i);
+    // Ensure an option order exists even when this is called from another view
+    // (e.g. the Marked view) that didn't pre-build Practice.optionOrder.
+    this.optionOrder = this.optionOrder || {};
+    if (!this.optionOrder[q.id]) {
+      const perm = q.options.map((_, i) => i);
+      shuffle(perm);
+      const awPos = perm.findIndex(oi => typeof q.options[oi] === 'string' && /כל התשובות האחרות/.test(q.options[oi]));
+      if (awPos >= 0) { const [aw] = perm.splice(awPos, 1); perm.push(aw); }
+      this.optionOrder[q.id] = perm;
+    }
+    const order = this.optionOrder[q.id];
     // Which display slot holds the correct answer (for the explanation label).
     const correctSlot = order.indexOf(q.correctIndex);
     return `
@@ -723,13 +733,16 @@ const Marked = {
     container.querySelectorAll('.option-item').forEach(btn => {
       btn.addEventListener('click', () => {
         const qId = parseInt(btn.closest('[data-qid]').dataset.qid);
-        const oIdx = parseInt(btn.dataset.option);
+        const displaySlot = parseInt(btn.dataset.option);
+        const order = Practice.optionOrder?.[qId] || [0, 1, 2, 3, 4];
+        const oIdx = order[displaySlot];
         const card = btn.closest('.practice-question');
-        card.querySelectorAll('.option-item').forEach((opt, i) => {
+        card.querySelectorAll('.option-item').forEach((opt, slot) => {
           opt.disabled = true;
           const q = Marked.resolved?.[qId] || QUESTIONS.find(qq => qq.id === qId);
-          if (i === q.correctIndex) opt.classList.add('correct');
-          else if (i === oIdx && i !== q.correctIndex) opt.classList.add('incorrect');
+          const origBehindSlot = order[slot];
+          if (origBehindSlot === q.correctIndex) opt.classList.add('correct');
+          else if (origBehindSlot === oIdx && oIdx !== q.correctIndex) opt.classList.add('incorrect');
         });
         const expBlock = card.querySelector('.explanation');
         if (expBlock) expBlock.style.display = 'block';
@@ -1005,6 +1018,9 @@ function renderHome() {
   const statsEl = document.getElementById('hero-stats');
 
   let bestScore = state.history.length > 0 ? Math.max(...state.history.map(h => h.score)) : null;
+  let avgScore = state.history.length > 0
+    ? Math.round(state.history.reduce((s, h) => s + h.score, 0) / state.history.length)
+    : null;
   let attempts = state.history.length;
   let marked = state.marked.length;
 
@@ -1020,6 +1036,10 @@ function renderHome() {
     <div class="hero-stat">
       <div class="hero-stat-value">${bestScore !== null ? bestScore : '–'}</div>
       <div class="hero-stat-label">הציון הגבוה</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">${avgScore !== null ? avgScore : '–'}</div>
+      <div class="hero-stat-label">ציון ממוצע</div>
     </div>
     <div class="hero-stat">
       <div class="hero-stat-value">${marked}</div>
