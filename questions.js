@@ -1638,8 +1638,8 @@ window.QUESTIONS = [
       "השהיית שידור (transmission delay)",
       "השהיית תור (queueing delay)",
     ],
-    correctIndex: 1,
-    explanation: "ההשהיה בין סוף קבלת החבילה אצל הנתב לבין תחילת שליחתה הלאה נובעת מ-propagation delay - הזמן שלוקח לאות להגיע מהמקור ליעד דרך המדיום. זה לא תלוי בגודל החבילה (בניגוד ל-transmission)."
+    correctIndex: 3,
+    explanation: "..."
   },
   {
     id: 141,
